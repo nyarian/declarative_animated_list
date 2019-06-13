@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:reactive_list/src/algorithm/myers/myer.dart';
+import 'package:reactive_list/src/algorithm/request.dart';
+import 'package:reactive_list/src/algorithm/result.dart';
 
 class ReactiveList<T> extends StatefulWidget {
   final List<T> items;
   final AnimatedListItemBuilder itemBuilder;
-  final AnimatedListItemBuilder removeBuilder;
+  final AnimatedListRemovedItemBuilder removeBuilder;
   final int initialItemCount;
   final Axis scrollDirection;
   final ScrollController scrollController;
@@ -45,9 +48,14 @@ class _ReactiveListState<T> extends State<ReactiveList> {
   }
 
   @override
-  void didUpdateWidget(ReactiveList oldWidget) {
+  void didUpdateWidget(final ReactiveList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    //TODO calculate diff and update all the things
+    final DifferenceResult result = MyersDifferenceAlgorithm().differentiate(
+        ListsDifferenceRequest(oldWidget.items, this.widget.items));
+    result.dispatchUpdates(_AnimatedListDifferenceConsumer(
+        this._animatedListKey.currentState,
+        this.widget.items,
+        this.widget.removeBuilder));
   }
 
   @override
@@ -64,5 +72,41 @@ class _ReactiveListState<T> extends State<ReactiveList> {
       reverse: widget.reverse,
       shrinkWrap: widget.shrinkWrap,
     );
+  }
+}
+
+class _AnimatedListDifferenceConsumer<T> extends DifferenceResultConsumer {
+  final AnimatedListState state;
+  final List<T> updatedList;
+  final AnimatedListRemovedItemBuilder removeBuilder;
+
+  _AnimatedListDifferenceConsumer(
+      this.state, this.updatedList, this.removeBuilder);
+
+  @override
+  void onInsert(final int position, final int count) {
+    for (int i = position; i < position + count; i++) {
+      state.insertItem(i);
+    }
+  }
+
+  @override
+  void onRemove(final int position, final int count) {
+    for (int i = position; i < position + count; i++) {
+      state.removeItem(i, this.removeBuilder);
+    }
+  }
+
+  @override
+  void onMove(final int oldPosition, final int newPosition) {
+    state.removeItem(oldPosition, this.removeBuilder);
+    state.insertItem(newPosition);
+  }
+
+  @override
+  void onChange(final int position, final int count, final Object payload) {
+    for (int i = position; i < position + count; i++) {
+      this.onMove(i, i);
+    }
   }
 }
