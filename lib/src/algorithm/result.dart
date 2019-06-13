@@ -31,7 +31,7 @@ class BatchedListUpdateConsumer implements DifferenceResultConsumer {
 
   @override
   void onInsert(final int position, final int count) {
-    if (this._lastEventType == 1 &&
+    if (this._lastEventType == type_add &&
         position >= this._lastEventPosition &&
         position <= this._lastEventPosition + this._lastEventCount) {
       this._lastEventCount += count;
@@ -40,13 +40,13 @@ class BatchedListUpdateConsumer implements DifferenceResultConsumer {
       this.dispatchLastEvent();
       this._lastEventPosition = position;
       this._lastEventCount = count;
-      this._lastEventType = 1;
+      this._lastEventType = type_add;
     }
   }
 
   @override
   void onRemove(final int position, final int count) {
-    if (this._lastEventType == 2 &&
+    if (this._lastEventType == type_remove &&
         this._lastEventPosition >= position &&
         this._lastEventPosition <= position + count) {
       this._lastEventCount += count;
@@ -55,7 +55,7 @@ class BatchedListUpdateConsumer implements DifferenceResultConsumer {
       this.dispatchLastEvent();
       this._lastEventPosition = position;
       this._lastEventCount = count;
-      this._lastEventType = 2;
+      this._lastEventType = type_remove;
     }
   }
 
@@ -67,7 +67,7 @@ class BatchedListUpdateConsumer implements DifferenceResultConsumer {
 
   @override
   void onChange(final int position, final int count, final Object payload) {
-    if (this._lastEventType == 3 &&
+    if (this._lastEventType == type_change &&
         position <= this._lastEventPosition + this._lastEventCount &&
         position + count >= this._lastEventPosition &&
         this._lastEventPayload == payload) {
@@ -80,7 +80,7 @@ class BatchedListUpdateConsumer implements DifferenceResultConsumer {
       this._lastEventPosition = position;
       this._lastEventCount = count;
       this._lastEventPayload = payload;
-      this._lastEventType = 3;
+      this._lastEventType = type_change;
     }
   }
 

@@ -22,13 +22,13 @@ class ReactiveList<T> extends StatefulWidget {
       @required this.items,
       @required this.itemBuilder,
       @required this.removeBuilder,
-      this.scrollDirection,
+      this.scrollDirection = Axis.vertical,
       this.scrollController,
       this.padding,
       this.physics,
       this.primary,
-      this.reverse,
-      this.shrinkWrap})
+      this.reverse = false,
+      this.shrinkWrap = false})
       : this.initialItemCount = items?.length ?? 0,
         super(key: key);
 

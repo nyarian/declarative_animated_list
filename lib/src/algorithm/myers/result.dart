@@ -243,9 +243,7 @@ class MyersDifferenceResult implements DifferenceResult {
       final int start,
       final int count,
       final int globalIndex) {
-    if (!_detectMoves) {
-      consumer.onRemove(start, count);
-    } else {
+    if (_detectMoves) {
       for (int i = count - 1; i >= 0; i--) {
         final int status = _oldItemStatuses[globalIndex + i] & flag_mask;
         switch (status) {
@@ -279,6 +277,8 @@ class MyersDifferenceResult implements DifferenceResult {
                 "Unknown flag for pos ${globalIndex + i} ${status.toRadixString(2)}");
         }
       }
+    } else {
+      consumer.onRemove(start, count);
     }
   }
 
