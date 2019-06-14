@@ -7,8 +7,9 @@ import 'package:declarative_animated_list/src/algorithm/myers/myer.dart';
 class DeclarativeList<T> extends StatefulWidget {
   final List<T> items;
   final AnimatedListItemBuilder itemBuilder;
-  final AnimatedListRemovedItemBuilder removeBuilder;
+  final RemoveBuilder<T> removeBuilder;
   final int initialItemCount;
+  final Duration removeDuration;
   final Axis scrollDirection;
   final ScrollController scrollController;
   final EdgeInsetsGeometry padding;
@@ -23,6 +24,7 @@ class DeclarativeList<T> extends StatefulWidget {
       @required this.itemBuilder,
       @required this.removeBuilder,
       this.scrollDirection = Axis.vertical,
+      this.removeDuration,
       this.scrollController,
       this.padding,
       this.physics,
@@ -33,10 +35,10 @@ class DeclarativeList<T> extends StatefulWidget {
         super(key: key);
 
   @override
-  _DeclarativeListState<T> createState() => _DeclarativeListState();
+  _DeclarativeListState<T> createState() => _DeclarativeListState<T>();
 }
 
-class _DeclarativeListState<T> extends State<DeclarativeList> {
+class _DeclarativeListState<T> extends State<DeclarativeList<T>> {
   final GlobalKey<AnimatedListState> _animatedListKey =
       GlobalKey<AnimatedListState>();
   List<T> items;
@@ -48,14 +50,17 @@ class _DeclarativeListState<T> extends State<DeclarativeList> {
   }
 
   @override
-  void didUpdateWidget(final DeclarativeList oldWidget) {
+  void didUpdateWidget(final DeclarativeList<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     final DifferenceResult result = MyersDifferenceAlgorithm().differentiate(
         ListsDifferenceRequest(oldWidget.items, this.widget.items));
-    result.dispatchUpdates(_AnimatedListDifferenceConsumer(
+    final DifferenceConsumer consumer = _AnimatedListDifferenceConsumer<T>(
         this._animatedListKey.currentState,
+        oldWidget.items,
         this.widget.items,
-        this.widget.removeBuilder));
+        this.widget.removeBuilder,
+        this.widget.removeDuration);
+    result.dispatchUpdates(consumer);
   }
 
   @override
@@ -77,11 +82,14 @@ class _DeclarativeListState<T> extends State<DeclarativeList> {
 
 class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
   final AnimatedListState state;
+  final List<T> oldList;
   final List<T> updatedList;
-  final AnimatedListRemovedItemBuilder removeBuilder;
+  final RemoveBuilder<T> removeBuilder;
+  final Duration removeDuration;
 
   _AnimatedListDifferenceConsumer(
-      this.state, this.updatedList, this.removeBuilder);
+      this.state, this.oldList, this.updatedList, this.removeBuilder,
+      [this.removeDuration]);
 
   @override
   void onInserted(final int position, final int count) {
@@ -93,20 +101,27 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
   @override
   void onRemoved(final int position, final int count) {
     for (int i = position; i < position + count; i++) {
-      state.removeItem(i, this.removeBuilder);
+      _removeItem(i);
     }
   }
 
   @override
   void onMoved(final int oldPosition, final int newPosition) {
-    state.removeItem(oldPosition, this.removeBuilder);
+    _removeItem(oldPosition);
     state.insertItem(newPosition);
   }
 
-  @override
-  void onChanged(final int position, final int count, final Object payload) {
-    for (int i = position; i < position + count; i++) {
-      this.onMoved(i, i);
+  void _removeItem(final int index) {
+    if (removeDuration != null) {
+      state.removeItem(index, this.removeBuilder(oldList[index]),
+          duration: removeDuration);
+    } else {
+      state.removeItem(index, this.removeBuilder(oldList[index]));
     }
   }
+
 }
+
+typedef InsertBuilder<T> = AnimatedListItemBuilder Function(T item);
+
+typedef RemoveBuilder<T> = AnimatedListRemovedItemBuilder Function(T item);
