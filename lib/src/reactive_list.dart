@@ -76,7 +76,7 @@ class _ReactiveListState<T> extends State<ReactiveList> {
   }
 }
 
-class _AnimatedListDifferenceConsumer<T> implements ListUpdateCallback {
+class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
   final AnimatedListState state;
   final List<T> updatedList;
   final AnimatedListRemovedItemBuilder removeBuilder;

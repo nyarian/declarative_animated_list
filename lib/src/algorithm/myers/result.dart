@@ -248,17 +248,8 @@ class DiffResult {
   ///update call that
   ///comes after it
   /// [updateCallback] -  The callback to receive the update operations.
-  void dispatchUpdatesTo(ListUpdateCallback updateCallback) {
-    BatchingListUpdateCallback batchingCallback;
-    if (updateCallback is BatchingListUpdateCallback) {
-      batchingCallback = updateCallback;
-    } else {
-      batchingCallback = new BatchingListUpdateCallback(updateCallback);
-      // replace updateCallback with a batching callback and override references to
-      // updateCallback so that we don't call it directly by mistake
-      //noinspection UnusedAssignment
-      updateCallback = batchingCallback;
-    }
+  void dispatchUpdatesTo(DifferenceConsumer updateCallback) {
+    final BatchingListUpdateCallback batchingCallback = updateCallback.batching();
     // These are add/remove ops that are converted to moves. We track their positions until
     // their respective update operations are processed.
     final List<PostponedUpdate> postponedUpdates = new List();
@@ -308,7 +299,7 @@ class DiffResult {
 
   void dispatchAdditions(
       List<PostponedUpdate> postponedUpdates,
-      ListUpdateCallback updateCallback,
+      DifferenceConsumer updateCallback,
       int start,
       int count,
       int globalIndex) {
@@ -352,7 +343,7 @@ class DiffResult {
 
   void dispatchRemovals(
       List<PostponedUpdate> postponedUpdates,
-      ListUpdateCallback updateCallback,
+      DifferenceConsumer updateCallback,
       int start,
       int count,
       int globalIndex) {
@@ -400,7 +391,7 @@ class DiffResult {
   }
 }
 
-abstract class ListUpdateCallback {
+abstract class DifferenceConsumer {
   void onInserted(int position, int count);
 
   void onRemoved(int position, int count);
@@ -408,14 +399,16 @@ abstract class ListUpdateCallback {
   void onMoved(int from, int to);
 
   void onChanged(int position, int count, Object payload);
+
+  BatchingListUpdateCallback batching() => BatchingListUpdateCallback(this);
 }
 
-class BatchingListUpdateCallback implements ListUpdateCallback {
+class BatchingListUpdateCallback implements DifferenceConsumer {
   static const int type_none = 0;
   static const int type_add = 1;
   static const int type_remove = 2;
   static const int type_change = 3;
-  final ListUpdateCallback mWrapped;
+  final DifferenceConsumer mWrapped;
   int mLastEventType = 0;
   int mLastEventPosition = -1;
   int mLastEventCount = -1;
@@ -495,6 +488,11 @@ class BatchingListUpdateCallback implements ListUpdateCallback {
       this.mLastEventPayload = payload;
       this.mLastEventType = 3;
     }
+  }
+
+  @override
+  BatchingListUpdateCallback batching() {
+    return this;
   }
 }
 

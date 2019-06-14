@@ -9,6 +9,7 @@ void main() {
 
   setUp(() {
     callback = MockListUpdateCallback();
+    when(callback.batching()).thenReturn(BatchingListUpdateCallback(callback));
   });
 
   tearDown(() {
@@ -93,4 +94,4 @@ DiffResult calculateWithLists<T>(final List<T> old, final List<T> updated) {
   return MyersDifferenceAlgorithm().calculateDiff(ListsCallback(old, updated));
 }
 
-class MockListUpdateCallback extends Mock implements ListUpdateCallback {}
+class MockListUpdateCallback extends Mock implements DifferenceConsumer {}
