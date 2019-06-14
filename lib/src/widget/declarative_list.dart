@@ -9,6 +9,7 @@ class DeclarativeList<T> extends StatefulWidget {
   final AnimatedListItemBuilder itemBuilder;
   final RemoveBuilder<T> removeBuilder;
   final int initialItemCount;
+  final Duration insertDuration;
   final Duration removeDuration;
   final Axis scrollDirection;
   final ScrollController scrollController;
@@ -24,6 +25,7 @@ class DeclarativeList<T> extends StatefulWidget {
       @required this.itemBuilder,
       @required this.removeBuilder,
       this.scrollDirection = Axis.vertical,
+      this.insertDuration,
       this.removeDuration,
       this.scrollController,
       this.padding,
@@ -55,11 +57,13 @@ class _DeclarativeListState<T> extends State<DeclarativeList<T>> {
     final DifferenceResult result = MyersDifferenceAlgorithm().differentiate(
         ListsDifferenceRequest(oldWidget.items, this.widget.items));
     final DifferenceConsumer consumer = _AnimatedListDifferenceConsumer<T>(
-        this._animatedListKey.currentState,
-        oldWidget.items,
-        this.widget.items,
-        this.widget.removeBuilder,
-        this.widget.removeDuration);
+      this._animatedListKey.currentState,
+      oldWidget.items,
+      this.widget.items,
+      this.widget.removeBuilder,
+      removeDuration: this.widget.removeDuration,
+      insertDuration: this.widget.insertDuration,
+    );
     result.dispatchUpdates(consumer);
   }
 
@@ -86,15 +90,16 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
   final List<T> updatedList;
   final RemoveBuilder<T> removeBuilder;
   final Duration removeDuration;
+  final Duration insertDuration;
 
   _AnimatedListDifferenceConsumer(
       this.state, this.oldList, this.updatedList, this.removeBuilder,
-      [this.removeDuration]);
+      {this.insertDuration, this.removeDuration});
 
   @override
   void onInserted(final int position, final int count) {
     for (int i = position; i < position + count; i++) {
-      state.insertItem(i);
+      _insertItem(i);
     }
   }
 
@@ -108,7 +113,15 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
   @override
   void onMoved(final int oldPosition, final int newPosition) {
     _removeItem(oldPosition);
-    state.insertItem(newPosition);
+    _insertItem(newPosition);
+  }
+
+  void _insertItem(int position) {
+    if (insertDuration != null) {
+      state.insertItem(position, duration: insertDuration);
+    } else {
+      state.insertItem(position);
+    }
   }
 
   void _removeItem(final int index) {
@@ -119,7 +132,6 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
       state.removeItem(index, this.removeBuilder(oldList[index]));
     }
   }
-
 }
 
 typedef InsertBuilder<T> = AnimatedListItemBuilder Function(T item);
