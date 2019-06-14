@@ -355,29 +355,29 @@ class Snake {
   /**
    * Position in the old list
    */
-  int x;
+  int x = 0;
 
   /**
    * Position in the new list
    */
-  int y;
+  int y = 0;
 
   /**
    * Number of matches. Might be 0.
    */
-  int size;
+  int size = 0;
 
   /**
    * If true, this is a removal from the original list followed by {@code size} matches.
    * If false, this is an addition from the new list followed by {@code size} matches.
    */
-  bool removal;
+  bool removal = false;
 
   /**
    * If true, the addition or removal is at the end of the snake.
    * If false, the addition or removal is at the beginning of the snake.
    */
-  bool reverse;
+  bool reverse = false;
 }
 
 /**
@@ -386,9 +386,9 @@ class Snake {
  * This internal class is used when running Myers' algorithm without recursion.
  */
 class Range {
-  int oldListStart, oldListEnd;
+  int oldListStart = 0, oldListEnd = 0;
 
-  int newListStart, newListEnd;
+  int newListStart = 0, newListEnd = 0;
 
   Range.empty() : this(0, 0, 0, 0);
 
@@ -408,11 +408,11 @@ class Range {
  * update.
  */
 class PostponedUpdate {
-  int posInOwnerList;
+  int posInOwnerList = 0;
 
-  int currentPos;
+  int currentPos = 0;
 
-  bool removal;
+  bool removal = false;
 
   PostponedUpdate(int posInOwnerList, int currentPos, bool removal) {
     this.posInOwnerList = posInOwnerList;

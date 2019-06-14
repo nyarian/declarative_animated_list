@@ -359,7 +359,7 @@ class DiffResult {
     for (int i = updates.length - 1; i >= 0; i--) {
       final PostponedUpdate update = updates[i];
       if (update.posInOwnerList == pos && update.removal == removal) {
-        updates.remove(i);
+        updates.removeAt(i);
         for (int j = i; j < updates.length; j++) {
           // offset other ops since they swapped positions
           updates[j].currentPos += removal ? 1 : -1;
@@ -465,13 +465,13 @@ class DiffResult {
 }
 
 abstract class ListUpdateCallback {
-  void onInserted(int var1, int var2);
+  void onInserted(int position, int count);
 
-  void onRemoved(int var1, int var2);
+  void onRemoved(int position, int count);
 
-  void onMoved(int var1, int var2);
+  void onMoved(int from, int to);
 
-  void onChanged(int var1, int var2, Object var3);
+  void onChanged(int position, int count, Object payload);
 }
 
 class BatchingListUpdateCallback implements ListUpdateCallback {
@@ -563,11 +563,11 @@ class BatchingListUpdateCallback implements ListUpdateCallback {
 }
 
 class PostponedUpdate {
-  int posInOwnerList;
+  int posInOwnerList = 0;
 
-  int currentPos;
+  int currentPos = 0;
 
-  bool removal;
+  bool removal = false;
 
   PostponedUpdate(int posInOwnerList, int currentPos, bool removal) {
     this.posInOwnerList = posInOwnerList;

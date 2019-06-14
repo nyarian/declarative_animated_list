@@ -121,13 +121,8 @@ class ListsCallback<T> extends Callback {
   ListsCallback(this.oldList, this.newList);
 
   @override
-  bool areContentsTheSame(int oldItemPosition, int newItemPosition) {
-    return oldList[oldItemPosition] == newList[newItemPosition];
-  }
-
-  @override
-  bool areItemsTheSame(int oldItemPosition, int newItemPosition) {
-    return oldList[oldItemPosition] == newList[newItemPosition];
+  int getOldListSize() {
+    return oldList.length;
   }
 
   @override
@@ -136,8 +131,13 @@ class ListsCallback<T> extends Callback {
   }
 
   @override
-  int getOldListSize() {
-    return oldList.length;
+  bool areItemsTheSame(int oldItemPosition, int newItemPosition) {
+    return oldList[oldItemPosition] == newList[newItemPosition];
+  }
+
+  @override
+  bool areContentsTheSame(int oldItemPosition, int newItemPosition) {
+    return oldList[oldItemPosition] == newList[newItemPosition];
   }
 
 }
