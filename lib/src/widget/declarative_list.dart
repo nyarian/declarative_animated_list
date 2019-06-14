@@ -6,8 +6,8 @@ import 'package:declarative_animated_list/src/algorithm/myers/myer.dart';
 
 class DeclarativeList<T> extends StatefulWidget {
   final List<T> items;
-  final AnimatedListItemBuilder itemBuilder;
-  final RemoveBuilder<T> removeBuilder;
+  final AnimatedItemBuilder<T> itemBuilder;
+  final AnimatedItemBuilder<T> removeBuilder;
   final int initialItemCount;
   final Duration insertDuration;
   final Duration removeDuration;
@@ -72,7 +72,9 @@ class _DeclarativeListState<T> extends State<DeclarativeList<T>> {
     return AnimatedList(
       key: _animatedListKey,
       initialItemCount: widget.initialItemCount,
-      itemBuilder: widget.itemBuilder,
+      itemBuilder: (BuildContext context, int index,
+              Animation<double> animation) =>
+          this.widget.itemBuilder(context, this.widget.items[index], animation),
       scrollDirection: widget.scrollDirection,
       controller: widget.scrollController,
       padding: widget.padding,
@@ -88,7 +90,7 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
   final AnimatedListState state;
   final List<T> oldList;
   final List<T> updatedList;
-  final RemoveBuilder<T> removeBuilder;
+  final AnimatedItemBuilder<T> removeBuilder;
   final Duration removeDuration;
   final Duration insertDuration;
 
@@ -125,15 +127,16 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
   }
 
   void _removeItem(final int index) {
+    final AnimatedListRemovedItemBuilder builder =
+        (final BuildContext context, final Animation<double> animation) =>
+            this.removeBuilder(context, oldList[index], animation);
     if (removeDuration != null) {
-      state.removeItem(index, this.removeBuilder(oldList[index]),
-          duration: removeDuration);
+      state.removeItem(index, builder, duration: removeDuration);
     } else {
-      state.removeItem(index, this.removeBuilder(oldList[index]));
+      state.removeItem(index, builder);
     }
   }
 }
 
-typedef InsertBuilder<T> = AnimatedListItemBuilder Function(T item);
-
-typedef RemoveBuilder<T> = AnimatedListRemovedItemBuilder Function(T item);
+typedef AnimatedItemBuilder<T> = Widget Function(
+    BuildContext context, T item, Animation<double> animation);
