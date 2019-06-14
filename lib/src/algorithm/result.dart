@@ -22,7 +22,7 @@ class BatchingListUpdateCallback implements DifferenceConsumer {
   static const int type_remove = 2;
   static const int type_change = 3;
   final DifferenceConsumer mWrapped;
-  int mLastEventType = 0;
+  int mLastEventType = type_none;
   int mLastEventPosition = -1;
   int mLastEventCount = -1;
   Object mLastEventPayload;
@@ -30,30 +30,30 @@ class BatchingListUpdateCallback implements DifferenceConsumer {
   BatchingListUpdateCallback(this.mWrapped);
 
   void dispatchLastEvent() {
-    if (this.mLastEventType != 0) {
+    if (this.mLastEventType != type_none) {
       switch (this.mLastEventType) {
-        case 1:
+        case type_add:
           this
               .mWrapped
               .onInserted(this.mLastEventPosition, this.mLastEventCount);
           break;
-        case 2:
+        case type_remove:
           this
               .mWrapped
               .onRemoved(this.mLastEventPosition, this.mLastEventCount);
           break;
-        case 3:
+        case type_change:
           this.mWrapped.onChanged(this.mLastEventPosition, this.mLastEventCount,
               this.mLastEventPayload);
       }
 
       this.mLastEventPayload = null;
-      this.mLastEventType = 0;
+      this.mLastEventType = type_none;
     }
   }
 
   void onInserted(int position, int count) {
-    if (this.mLastEventType == 1 &&
+    if (this.mLastEventType == type_add &&
         position >= this.mLastEventPosition &&
         position <= this.mLastEventPosition + this.mLastEventCount) {
       this.mLastEventCount += count;
@@ -62,12 +62,12 @@ class BatchingListUpdateCallback implements DifferenceConsumer {
       this.dispatchLastEvent();
       this.mLastEventPosition = position;
       this.mLastEventCount = count;
-      this.mLastEventType = 1;
+      this.mLastEventType = type_add;
     }
   }
 
   void onRemoved(int position, int count) {
-    if (this.mLastEventType == 2 &&
+    if (this.mLastEventType == type_remove &&
         this.mLastEventPosition >= position &&
         this.mLastEventPosition <= position + count) {
       this.mLastEventCount += count;
@@ -76,7 +76,7 @@ class BatchingListUpdateCallback implements DifferenceConsumer {
       this.dispatchLastEvent();
       this.mLastEventPosition = position;
       this.mLastEventCount = count;
-      this.mLastEventType = 2;
+      this.mLastEventType = type_remove;
     }
   }
 
@@ -86,7 +86,7 @@ class BatchingListUpdateCallback implements DifferenceConsumer {
   }
 
   void onChanged(int position, int count, Object payload) {
-    if (this.mLastEventType == 3 &&
+    if (this.mLastEventType == type_change &&
         position <= this.mLastEventPosition + this.mLastEventCount &&
         position + count >= this.mLastEventPosition &&
         this.mLastEventPayload == payload) {
@@ -99,12 +99,10 @@ class BatchingListUpdateCallback implements DifferenceConsumer {
       this.mLastEventPosition = position;
       this.mLastEventCount = count;
       this.mLastEventPayload = payload;
-      this.mLastEventType = 3;
+      this.mLastEventType = type_change;
     }
   }
 
   @override
-  BatchingListUpdateCallback batching() {
-    return this;
-  }
+  BatchingListUpdateCallback batching() => this;
 }
