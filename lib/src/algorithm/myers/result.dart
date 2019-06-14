@@ -3,21 +3,18 @@ import 'dart:math';
 import 'package:declarative_animated_list/src/algorithm/myers/myer.dart';
 
 class DiffResult {
-  /**
-   * Signifies an item not present in the list.
-   */
+  ///Signifies an item not present in the list.
   static const int no_position = -1;
 
-  /**
-   * While reading the flags below, keep in mind that when multiple items move in a list,
-   * Myers's may pick any of them as the anchor item and consider that one NOT_CHANGED while
-   * picking others as additions and removals. This is completely fine as we later detect
-   * all moves.
-   * <p>
-   * Below, when an item is mentioned to stay in the same "location", it means we won't
-   * dispatch a move/add/remove for it, it DOES NOT mean the item is still in the same
-   * position.
-   */
+  ///
+  ///While reading the flags below, keep in mind that when multiple items move in a list,
+  ///Myers's may pick any of them as the anchor item and consider that one NOT_CHANGED while
+  ///picking others as additions and removals. This is completely fine as we later detect
+  ///all moves.
+  ///Below, when an item is mentioned to stay in the same "location", it means we won't
+  ///dispatch a move/add/remove for it, it DOES NOT mean the item is still in the same
+  ///position.
+  ///
   // item stayed the same.
   static const int flag_not_changed = 1;
 
@@ -56,7 +53,7 @@ class DiffResult {
   // which also includes whether they were a real addition or a move(and its old index).
   final List<int> mNewItemStatuses;
 
-  // The callback that was given to calcualte diff method.
+  // The callback that was given to calculate diff method.
   final Callback mCallback;
 
   final int mOldListSize;
@@ -65,13 +62,11 @@ class DiffResult {
 
   final bool mDetectMoves;
 
-  /**
-   * @param callback        The callback that was used to calculate the diff
-   * @param snakes          The list of Myers' snakes
-   * @param oldItemStatuses An int[] that can be re-purposed to keep metadata
-   * @param newItemStatuses An int[] that can be re-purposed to keep metadata
-   * @param detectMoves     True if this DiffResult will try to detect moved items
-   */
+  ///[callback] The callback that was used to calculate the diff
+  ///[snakes] The list of Myers' snakes
+  ///[oldItemStatuses] An List<int> that can be re-purposed to keep metadata
+  ///[newItemStatuses] An List<int> that can be re-purposed to keep metadata
+  ///[detectMoves] True if this DiffResult will try to detect moved items
   DiffResult(this.mCallback, this.mSnakes, this.mOldItemStatuses,
       this.mNewItemStatuses, this.mDetectMoves)
       : this.mOldListSize = mCallback.getOldListSize(),
@@ -82,10 +77,8 @@ class DiffResult {
     findMatchingItems();
   }
 
-  /**
-   * We always add a Snake to 0/0 so that we can run loops from end to beginning and be done
-   * when we run out of snakes.
-   */
+  ///We always add a Snake to 0/0 so that we can run loops from end to beginning and be done
+  ///when we run out of snakes.
   void addRootSnake() {
     Snake firstSnake = mSnakes.isEmpty ? null : mSnakes[0];
     if (firstSnake == null || firstSnake.x != 0 || firstSnake.y != 0) {
@@ -99,17 +92,13 @@ class DiffResult {
     }
   }
 
-  /**
-   * This method traverses each addition / removal and tries to match it to a previous
-   * removal / addition. This is how we detect move operations.
-   * <p>
-   * This class also flags whether an item has been changed or not.
-   * <p>
-   * DiffUtil does this pre-processing so that if it is running on a big list, it can be moved
-   * to background thread where most of the expensive stuff will be calculated and kept in
-   * the statuses maps. DiffResult uses this pre-calculated information while dispatching
-   * the updates (which is probably being called on the main thread).
-   */
+  ///This method traverses each addition / removal and tries to match it to a previous
+  ///removal / addition. This is how we detect move operations.
+  ///This class also flags whether an item has been changed or not.
+  ///Implementation does this pre-processing so that if it is running on a big list, it can be moved
+  ///to background thread where most of the expensive stuff will be calculated and kept in
+  ///the statuses maps. Result uses this pre-calculated information while dispatching
+  ///the updates (which is probably being called on the main thread).
   void findMatchingItems() {
     int posOld = mOldListSize;
     int posNew = mNewListSize;
@@ -160,15 +149,10 @@ class DiffResult {
     findMatchingItem(x, y, snakeIndex, true);
   }
 
-  /**
-   * Given a position in the old list, returns the position in the new list, or
-   * {@code NO_POSITION} if it was removed.
-   *
-   * @param oldListPosition Position of item in old list
-   * @return Position of item in new list, or {@code NO_POSITION} if not present.
-   * @see #NO_POSITION
-   * @see #convertNewPositionToOld(int)
-   */
+  ///Given a position in the old list, returns the position in the new list, or
+  ///[no_position] if it was removed.
+  ///[oldListPosition] is position of item in old list
+  ///Returns the position of item in new list, or [no_position] if not present.
   convertOldPositionToNew(int oldListPosition) {
     if (oldListPosition < 0 || oldListPosition >= mOldItemStatuses.length) {
       throw new RangeError(
@@ -183,15 +167,10 @@ class DiffResult {
     }
   }
 
-  /**
-   * Given a position in the new list, returns the position in the old list, or
-   * {@code NO_POSITION} if it was removed.
-   *
-   * @param newListPosition Position of item in new list
-   * @return Position of item in old list, or {@code NO_POSITION} if not present.
-   * @see #NO_POSITION
-   * @see #convertOldPositionToNew(int)
-   */
+  ///Given a position in the new list, returns the position in the old list, or
+  ///[no_position] if it was removed.
+  ///[newListPosition] - position of item in new list
+  ///Returns the position of item in old list, or {@code NO_POSITION} if not present.
   convertNewPositionToOld(int newListPosition) {
     if (newListPosition < 0 || newListPosition >= mNewItemStatuses.length) {
       throw new RangeError(
@@ -206,16 +185,13 @@ class DiffResult {
     }
   }
 
-  /**
-   * Finds a matching item that is before the given coordinates in the matrix
-   * (before : left and above).
-   *
-   * @param x          The x position in the matrix (position in the old list)
-   * @param y          The y position in the matrix (position in the new list)
-   * @param snakeIndex The current snake index
-   * @param removal    True if we are looking for a removal, false otherwise
-   * @return True if such item is found.
-   */
+  ///Finds a matching item that is before the given coordinates in the matrix
+  ///(before : left and above).
+  ///[x] The x position in the matrix (position in the old list)
+  ///[y] The y position in the matrix (position in the new list)
+  ///[snakeIndex] The current snake index
+  ///[removal] - true if we are looking for a removal, false otherwise
+  ///Returns true if such item is found.
   findMatchingItem(
       final int x, final int y, final int snakeIndex, final bool removal) {
     int myItemPos;
@@ -267,51 +243,11 @@ class DiffResult {
     return false;
   }
 
-  /**
-   * Dispatches the update events to the given adapter.
-   * <p>
-   * For example, if you have an {@link RecyclerView.Adapter Adapter}
-   * that is backed by a {@link List}, you can swap the list with the new one then call this
-   * method to dispatch all updates to the RecyclerView.
-   * <pre>
-   *     List oldList = mAdapter.getData();
-   *     DiffResult result = DiffUtil.calculateDiff(new MyCallback(oldList, newList));
-   *     mAdapter.setData(newList);
-   *     result.dispatchUpdatesTo(mAdapter);
-   * </pre>
-   * <p>
-   * Note that the RecyclerView requires you to dispatch adapter updates immediately when you
-   * change the data (you cannot defer {@code notify*} calls). The usage above adheres to this
-   * rule because updates are sent to the adapter right after the backing data is changed,
-   * before RecyclerView tries to read it.
-   * <p>
-   * On the other hand, if you have another
-   * {@link RecyclerView.AdapterDataObserver AdapterDataObserver}
-   * that tries to process events synchronously, this may confuse that observer because the
-   * list is instantly moved to its final state while the adapter updates are dispatched later
-   * on, one by one. If you have such an
-   * {@link RecyclerView.AdapterDataObserver AdapterDataObserver},
-   * you can use
-   * {@link #dispatchUpdatesTo(ListUpdateCallback)} to handle each modification
-   * manually.
-   *
-   * @param adapter A RecyclerView adapter which was displaying the old list and will start
-   *                displaying the new list.
-   * @see AdapterListUpdateCallback
-   */
-//  void dispatchUpdatesTo(final RecyclerView.Adapter adapter) {
-//    dispatchUpdatesTo(new AdapterListUpdateCallback(adapter));
-//  }
-
-  /**
-   * Dispatches update operations to the given Callback.
-   * <p>
-   * These updates are atomic such that the first update call affects every update call that
-   * comes after it (the same as RecyclerView).
-   *
-   * @param updateCallback The callback to receive the update operations.
-   * @see #dispatchUpdatesTo(RecyclerView.Adapter)
-   */
+  ///Dispatches update operations to the given Callback.
+  ///These updates are atomic such that the first update call affects every
+  ///update call that
+  ///comes after it
+  /// [updateCallback] -  The callback to receive the update operations.
   void dispatchUpdatesTo(ListUpdateCallback updateCallback) {
     BatchingListUpdateCallback batchingCallback;
     if (updateCallback is BatchingListUpdateCallback) {
