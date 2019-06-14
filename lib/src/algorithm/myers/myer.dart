@@ -17,14 +17,14 @@ class MyersDifferenceAlgorithm {
     return calculateDifference(cb, true);
   }
 
-   ///Calculates the list of update operations that can covert one list into the other one.
-   ///If your old and new lists are sorted by the same constraint and items never move (swap
-   ///positions), you can disable move detection which takes O(N^2) time where
-   ///N is the number of added, moved, removed items.
-   ///[cb] The callback that acts as a gateway to the backing list data
-   ///[detectMoves] True if algorithm implementation should try to detect moved items, false otherwise.
-   ///Returns a [Result] that contains the information about the edit sequence to convert the
-   ///old list into the new list.
+  ///Calculates the list of update operations that can covert one list into the other one.
+  ///If your old and new lists are sorted by the same constraint and items never move (swap
+  ///positions), you can disable move detection which takes O(N^2) time where
+  ///N is the number of added, moved, removed items.
+  ///[cb] The callback that acts as a gateway to the backing list data
+  ///[detectMoves] True if algorithm implementation should try to detect moved items, false otherwise.
+  ///Returns a [Result] that contains the information about the edit sequence to convert the
+  ///old list into the new list.
   DiffResult calculateDifference(Callback cb, bool detectMoves) {
     final int oldSize = cb.getOldListSize();
     final int newSize = cb.getNewListSize();
@@ -141,16 +141,13 @@ class MyersDifferenceAlgorithm {
           y++;
         }
         forward[kOffset + k] = x;
-        if (checkInFwd && k >= delta - d + 1 && k <= delta + d - 1) {
-          if (forward[kOffset + k] >= backward[kOffset + k]) {
-            Snake outSnake = new Snake();
-            outSnake.x = backward[kOffset + k];
-            outSnake.y = outSnake.x - k;
-            outSnake.size = forward[kOffset + k] - backward[kOffset + k];
-            outSnake.removal = removal;
-            outSnake.reverse = false;
-            return outSnake;
-          }
+        if (checkInFwd &&
+            k >= delta - d + 1 &&
+            k <= delta + d - 1 &&
+            forward[kOffset + k] >= backward[kOffset + k]) {
+          final int snakeX = backward[kOffset + k];
+          return Snake(snakeX, snakeX - k, forward[kOffset + k] - snakeX,
+              removal, false);
         }
       }
       for (int k = -d; k <= d; k += 2) {
@@ -179,17 +176,13 @@ class MyersDifferenceAlgorithm {
           y--;
         }
         backward[kOffset + backwardK] = x;
-        if (!checkInFwd && k + delta >= -d && k + delta <= d) {
-          if (forward[kOffset + backwardK] >= backward[kOffset + backwardK]) {
-            Snake outSnake = new Snake();
-            outSnake.x = backward[kOffset + backwardK];
-            outSnake.y = outSnake.x - backwardK;
-            outSnake.size =
-                forward[kOffset + backwardK] - backward[kOffset + backwardK];
-            outSnake.removal = removal;
-            outSnake.reverse = true;
-            return outSnake;
-          }
+        if (!checkInFwd &&
+            k + delta >= -d &&
+            k + delta <= d &&
+            forward[kOffset + backwardK] >= backward[kOffset + backwardK]) {
+          final int snakeX = backward[kOffset + backwardK];
+          return Snake(snakeX, snakeX - backwardK,
+              forward[kOffset + backwardK] - snakeX, removal, true);
         }
       }
     }
@@ -243,21 +236,25 @@ abstract class Callback {
 ///add or remove operation. See the Myers' paper for details.
 class Snake {
   ///Position in the old list
-  int x = 0;
+  int x;
 
   ///Position in the new list
-  int y = 0;
+  int y;
 
   ///Number of matches. Might be 0.
-  int size = 0;
+  final int size;
 
   ///If true, this is a removal from the original list followed by {@code size} matches.
   ///If false, this is an addition from the new list followed by {@code size} matches.
-  bool removal = false;
+  final bool removal;
 
   ///If true, the addition or removal is at the end of the snake.
   ///If false, the addition or removal is at the beginning of the snake.
-  bool reverse = false;
+  final bool reverse;
+
+  Snake(this.x, this.y, this.size, this.removal, this.reverse);
+
+  Snake.empty() : this(0, 0, 0, false, false);
 }
 
 ///Represents a range in two lists that needs to be solved.

@@ -82,13 +82,7 @@ class DiffResult {
   void addRootSnake() {
     Snake firstSnake = mSnakes.isEmpty ? null : mSnakes[0];
     if (firstSnake == null || firstSnake.x != 0 || firstSnake.y != 0) {
-      Snake root = new Snake();
-      root.x = 0;
-      root.y = 0;
-      root.removal = false;
-      root.size = 0;
-      root.reverse = false;
-      mSnakes.insert(0, root);
+      mSnakes.insert(0, Snake.empty());
     }
   }
 
