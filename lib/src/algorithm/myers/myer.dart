@@ -1,8 +1,11 @@
 import 'package:declarative_animated_list/src/algorithm/myers/result.dart';
 import 'package:declarative_animated_list/src/algorithm/myers/snake.dart';
+import 'package:declarative_animated_list/src/algorithm/request.dart';
+import 'package:declarative_animated_list/src/algorithm/result.dart';
+import 'package:declarative_animated_list/src/algorithm/strategy.dart';
 
-class MyersDifferenceAlgorithm {
-  final Comparator<Snake> snakeComparator = (o1, o2) {
+class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
+  static final Comparator<Snake> snakeComparator = (o1, o2) {
     int cmpX = o1.x - o2.x;
     return cmpX == 0 ? o1.y - o2.y : cmpX;
   };
@@ -14,8 +17,9 @@ class MyersDifferenceAlgorithm {
   ///[cb] The callback that acts as a gateway to the backing list data
   ///A Result that contains the information about the edit sequence to convert the
   ///old list into the new list.
-  DiffResult calculateDiff(Callback cb) {
-    return calculateDifference(cb, true);
+  @override
+  DifferenceResult differentiate(final DifferenceRequest request) {
+    return calculateDifference(request, true);
   }
 
   ///Calculates the list of update operations that can covert one list into the other one.
@@ -26,9 +30,9 @@ class MyersDifferenceAlgorithm {
   ///[detectMoves] True if algorithm implementation should try to detect moved items, false otherwise.
   ///Returns a [Result] that contains the information about the edit sequence to convert the
   ///old list into the new list.
-  DiffResult calculateDifference(Callback cb, bool detectMoves) {
-    final int oldSize = cb.getOldListSize();
-    final int newSize = cb.getNewListSize();
+  DifferenceResult calculateDifference(final DifferenceRequest request, final bool detectMoves) {
+    final int oldSize = request.oldSize;
+    final int newSize = request.newSize;
 
     final List<Snake> snakes = new List();
 
@@ -49,7 +53,7 @@ class MyersDifferenceAlgorithm {
     final List<Range> rangePool = new List();
     while (stack.isNotEmpty) {
       final Range range = stack.removeAt(stack.length - 1);
-      final Snake snake = diffPartial(cb, range.oldListStart, range.oldListEnd,
+      final Snake snake = diffPartial(request, range.oldListStart, range.oldListEnd,
           range.newListStart, range.newListEnd, forward, backward, max);
       if (snake != null) {
         if (snake.size > 0) {
@@ -100,10 +104,10 @@ class MyersDifferenceAlgorithm {
       }
     }
     snakes.sort(snakeComparator);
-    return new DiffResult(cb, snakes, forward, backward, detectMoves);
+    return new MyersDifferenceResult(request, snakes, forward, backward, detectMoves);
   }
 
-  Snake diffPartial(Callback cb, int startOld, int endOld, int startNew,
+  Snake diffPartial(final DifferenceRequest request, int startOld, int endOld, int startNew,
       int endNew, List<int> forward, List<int> backward, int kOffset) {
     final int oldSize = endOld - startOld;
     final int newSize = endNew - startNew;
@@ -137,7 +141,7 @@ class MyersDifferenceAlgorithm {
 // move diagonal as long as items match
         while (x < oldSize &&
             y < newSize &&
-            cb.areItemsTheSame(startOld + x, startNew + y)) {
+            request.isTheSameConceptualEntity(startOld + x, startNew + y)) {
           x++;
           y++;
         }
@@ -172,7 +176,7 @@ class MyersDifferenceAlgorithm {
 // move diagonal as long as items match
         while (x > 0 &&
             y > 0 &&
-            cb.areItemsTheSame(startOld + x - 1, startNew + y - 1)) {
+            request.isTheSameConceptualEntity(startOld + x - 1, startNew + y - 1)) {
           x--;
           y--;
         }

@@ -1,9 +1,9 @@
+import 'package:declarative_animated_list/src/algorithm/request.dart';
+import 'package:declarative_animated_list/src/algorithm/result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:declarative_animated_list/src/algorithm/myers/myer.dart';
-import 'package:declarative_animated_list/src/algorithm/myers/result.dart';
 
-import 'algorithm/myers/result.dart';
 
 class ReactiveList<T> extends StatefulWidget {
   final List<T> items;
@@ -51,9 +51,9 @@ class _ReactiveListState<T> extends State<ReactiveList> {
   @override
   void didUpdateWidget(final ReactiveList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final DiffResult result = MyersDifferenceAlgorithm().calculateDiff(
+    final DifferenceResult result = MyersDifferenceAlgorithm().differentiate(
         ListsCallback(oldWidget.items, this.widget.items));
-    result.dispatchUpdatesTo(_AnimatedListDifferenceConsumer(
+    result.dispatchUpdates(_AnimatedListDifferenceConsumer(
         this._animatedListKey.currentState,
         this.widget.items,
         this.widget.removeBuilder));
@@ -112,7 +112,7 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
   }
 }
 
-class ListsCallback<T> extends Callback {
+class ListsCallback<T> extends DifferenceRequest {
 
   final List<T> oldList;
   final List<T> newList;
@@ -121,23 +121,19 @@ class ListsCallback<T> extends Callback {
   ListsCallback(this.oldList, this.newList);
 
   @override
-  int getOldListSize() {
-    return oldList.length;
+  bool areInstancesEqual(int oldPosition, int newPosition) {
+    return oldList[oldPosition] == newList[newPosition];
   }
 
   @override
-  int getNewListSize() {
-    return newList.length;
+  bool isTheSameConceptualEntity(int oldPosition, int newPosition) {
+    return oldList[oldPosition] == newList[newPosition];
   }
 
   @override
-  bool areItemsTheSame(int oldItemPosition, int newItemPosition) {
-    return oldList[oldItemPosition] == newList[newItemPosition];
-  }
+  int get newSize => newList.length;
 
   @override
-  bool areContentsTheSame(int oldItemPosition, int newItemPosition) {
-    return oldList[oldItemPosition] == newList[newItemPosition];
-  }
+  int get oldSize => oldList.length;
 
 }

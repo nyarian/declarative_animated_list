@@ -1,9 +1,8 @@
-import 'dart:math';
-
-import 'package:declarative_animated_list/src/algorithm/myers/myer.dart';
 import 'package:declarative_animated_list/src/algorithm/myers/snake.dart';
+import 'package:declarative_animated_list/src/algorithm/request.dart';
+import 'package:declarative_animated_list/src/algorithm/result.dart';
 
-class DiffResult {
+class MyersDifferenceResult implements DifferenceResult {
   ///Signifies an item not present in the list.
   static const int no_position = -1;
 
@@ -55,7 +54,7 @@ class DiffResult {
   final List<int> mNewItemStatuses;
 
   // The callback that was given to calculate diff method.
-  final Callback mCallback;
+  final DifferenceRequest _request;
 
   final int mOldListSize;
 
@@ -68,10 +67,10 @@ class DiffResult {
   ///[oldItemStatuses] An List<int> that can be re-purposed to keep metadata
   ///[newItemStatuses] An List<int> that can be re-purposed to keep metadata
   ///[detectMoves] True if this DiffResult will try to detect moved items
-  DiffResult(this.mCallback, this.mSnakes, this.mOldItemStatuses,
+  MyersDifferenceResult(this._request, this.mSnakes, this.mOldItemStatuses,
       this.mNewItemStatuses, this.mDetectMoves)
-      : this.mOldListSize = mCallback.getOldListSize(),
-        this.mNewListSize = mCallback.getNewListSize() {
+      : this.mOldListSize = _request.oldSize,
+        this.mNewListSize = _request.newSize {
     mOldItemStatuses.fillRange(0, mOldItemStatuses.length, 0);
     mNewItemStatuses.fillRange(0, mNewItemStatuses.length, 0);
     addRootSnake();
@@ -120,7 +119,7 @@ class DiffResult {
         final int oldItemPos = snake.x + j;
         final int newItemPos = snake.y + j;
         final bool theSame =
-            mCallback.areContentsTheSame(oldItemPos, newItemPos);
+            _request.areInstancesEqual(oldItemPos, newItemPos);
         final int changeFlag = theSame ? flag_not_changed : flag_changed;
         mOldItemStatuses[oldItemPos] = (newItemPos << flag_offset) | changeFlag;
         mNewItemStatuses[newItemPos] = (oldItemPos << flag_offset) | changeFlag;
@@ -208,9 +207,9 @@ class DiffResult {
       if (removal) {
         // check removals for a match
         for (int pos = curX - 1; pos >= endX; pos--) {
-          if (mCallback.areItemsTheSame(pos, myItemPos)) {
+          if (_request.isTheSameConceptualEntity(pos, myItemPos)) {
             // found!
-            final bool theSame = mCallback.areContentsTheSame(pos, myItemPos);
+            final bool theSame = _request.areInstancesEqual(pos, myItemPos);
             final int changeFlag =
                 theSame ? flag_moved_not_changed : flag_moved_changed;
             mNewItemStatuses[myItemPos] = (pos << flag_offset) | flag_ignore;
@@ -221,9 +220,9 @@ class DiffResult {
       } else {
         // check for additions for a match
         for (int pos = curY - 1; pos >= endY; pos--) {
-          if (mCallback.areItemsTheSame(myItemPos, pos)) {
+          if (_request.isTheSameConceptualEntity(myItemPos, pos)) {
             // found
-            final bool theSame = mCallback.areContentsTheSame(myItemPos, pos);
+            final bool theSame = _request.areInstancesEqual(myItemPos, pos);
             final int changeFlag =
                 theSame ? flag_moved_not_changed : flag_moved_changed;
             mOldItemStatuses[x - 1] = (pos << flag_offset) | flag_ignore;
@@ -243,7 +242,8 @@ class DiffResult {
   ///update call that
   ///comes after it
   /// [updateCallback] -  The callback to receive the update operations.
-  void dispatchUpdatesTo(DifferenceConsumer updateCallback) {
+  @override
+  void dispatchUpdates(DifferenceConsumer updateCallback) {
     final BatchingListUpdateCallback batchingCallback = updateCallback.batching();
     // These are add/remove ops that are converted to moves. We track their positions until
     // their respective update operations are processed.
@@ -267,7 +267,7 @@ class DiffResult {
       for (int i = snakeSize - 1; i >= 0; i--) {
         if ((mOldItemStatuses[snake.x + i] & flag_mask) == flag_changed) {
           batchingCallback.onChanged(snake.x + i, 1,
-              mCallback.getChangePayload(snake.x + i, snake.y + i));
+              _request.getChangePayload(snake.x + i, snake.y + i));
         }
       }
       posOld = snake.x;
@@ -322,7 +322,7 @@ class DiffResult {
           if (status == flag_moved_changed) {
             // also dispatch a change
             updateCallback.onChanged(
-                start, 1, mCallback.getChangePayload(pos, globalIndex + i));
+                start, 1, _request.getChangePayload(pos, globalIndex + i));
           }
           break;
         case flag_ignore: // ignoring this
@@ -367,7 +367,7 @@ class DiffResult {
           if (status == flag_moved_changed) {
             // also dispatch a change
             updateCallback.onChanged(update.currentPos - 1, 1,
-                mCallback.getChangePayload(globalIndex + i, pos));
+                _request.getChangePayload(globalIndex + i, pos));
           }
           break;
         case flag_ignore: // ignoring this
@@ -383,111 +383,6 @@ class DiffResult {
 
   List<Snake> getSnakes() {
     return mSnakes;
-  }
-}
-
-abstract class DifferenceConsumer {
-  void onInserted(int position, int count);
-
-  void onRemoved(int position, int count);
-
-  void onMoved(int from, int to);
-
-  void onChanged(int position, int count, Object payload);
-
-  BatchingListUpdateCallback batching() => BatchingListUpdateCallback(this);
-}
-
-class BatchingListUpdateCallback implements DifferenceConsumer {
-  static const int type_none = 0;
-  static const int type_add = 1;
-  static const int type_remove = 2;
-  static const int type_change = 3;
-  final DifferenceConsumer mWrapped;
-  int mLastEventType = 0;
-  int mLastEventPosition = -1;
-  int mLastEventCount = -1;
-  Object mLastEventPayload;
-
-  BatchingListUpdateCallback(this.mWrapped);
-
-  void dispatchLastEvent() {
-    if (this.mLastEventType != 0) {
-      switch (this.mLastEventType) {
-        case 1:
-          this
-              .mWrapped
-              .onInserted(this.mLastEventPosition, this.mLastEventCount);
-          break;
-        case 2:
-          this
-              .mWrapped
-              .onRemoved(this.mLastEventPosition, this.mLastEventCount);
-          break;
-        case 3:
-          this.mWrapped.onChanged(this.mLastEventPosition, this.mLastEventCount,
-              this.mLastEventPayload);
-      }
-
-      this.mLastEventPayload = null;
-      this.mLastEventType = 0;
-    }
-  }
-
-  void onInserted(int position, int count) {
-    if (this.mLastEventType == 1 &&
-        position >= this.mLastEventPosition &&
-        position <= this.mLastEventPosition + this.mLastEventCount) {
-      this.mLastEventCount += count;
-      this.mLastEventPosition = min(position, this.mLastEventPosition);
-    } else {
-      this.dispatchLastEvent();
-      this.mLastEventPosition = position;
-      this.mLastEventCount = count;
-      this.mLastEventType = 1;
-    }
-  }
-
-  void onRemoved(int position, int count) {
-    if (this.mLastEventType == 2 &&
-        this.mLastEventPosition >= position &&
-        this.mLastEventPosition <= position + count) {
-      this.mLastEventCount += count;
-      this.mLastEventPosition = position;
-    } else {
-      this.dispatchLastEvent();
-      this.mLastEventPosition = position;
-      this.mLastEventCount = count;
-      this.mLastEventType = 2;
-    }
-  }
-
-  void onMoved(int fromPosition, int toPosition) {
-    this.dispatchLastEvent();
-    this.mWrapped.onMoved(fromPosition, toPosition);
-  }
-
-  void onChanged(int position, int count, Object payload) {
-    if (this.mLastEventType == 3 &&
-        position <= this.mLastEventPosition + this.mLastEventCount &&
-        position + count >= this.mLastEventPosition &&
-        this.mLastEventPayload == payload) {
-      int previousEnd = this.mLastEventPosition + this.mLastEventCount;
-      this.mLastEventPosition = min(position, this.mLastEventPosition);
-      this.mLastEventCount =
-          max(previousEnd, position + count) - this.mLastEventPosition;
-    } else {
-      this.dispatchLastEvent();
-      this.mLastEventPosition = position;
-      this.mLastEventCount = count;
-      this.mLastEventPayload = payload;
-      this.mLastEventType = 3;
-    }
-  }
-
-  @override
-  BatchingListUpdateCallback batching() {
-    return this;
   }
 }
 

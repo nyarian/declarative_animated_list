@@ -7,7 +7,7 @@ abstract class DifferenceRequest {
 
   bool areInstancesEqual(final int oldPosition, final int newPosition);
 
-  Object getChangePayload(final int oldPosition, final int newPosition);
+  Object getChangePayload(final int oldPosition, final int newPosition) => null;
 }
 
 class ListsDifferenceRequest<T> implements DifferenceRequest {
