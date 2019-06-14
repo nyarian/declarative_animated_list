@@ -1,8 +1,13 @@
 name: declarative_animated_list
-description: An implementation of animated list widget that will be automatically updated based on different lists snippets.
+description: An implementation of animated list widget that will be automatically updated based on different lists
+  snippets. Based on Android's DiffUtil with slight changes to support Flutter's declarative UI.
 version: 0.0.1
-author: Andrii Iliunin
-homepage: https://github.com/nyarian
+authors:
+  - Andrii Iliunin <orkay255@gmail.com>
+  - New Line Technologies
+homepage: https://github.com/nyarian/declarative_animated_list
+repository: https://bitbucket.org/ilyunin111/declarative_animated_list
+issue_tracker: https://github.com/nyarian/declarative_animated_list/issues
 
 environment:
   sdk: ">=2.1.0 <3.0.0"

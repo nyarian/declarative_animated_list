@@ -19,18 +19,31 @@ import 'package:declarative_animated_list/src/algorithm/result.dart';
 import 'package:declarative_animated_list/src/algorithm/strategy.dart';
 
 class DeclarativeList<T> extends StatefulWidget {
+  ///Set of items to be displayed in the list
   final List<T> items;
+  ///Builder function for inserted items
   final AnimatedItemBuilder<T> itemBuilder;
+  ///Builder function for removed items
   final AnimatedItemBuilder<T> removeBuilder;
+  ///Initial items count for the list, gets defined automatically
   final int initialItemCount;
+  ///Refer to [AnimatedListState.insertItem]
   final Duration insertDuration;
+  ///Refer to [AnimatedListState.removeItem]
   final Duration removeDuration;
+  ///Refer to [AnimatedList.scrollDirection]
   final Axis scrollDirection;
+  ///Refer to [AnimatedList.scrollController]
   final ScrollController scrollController;
+  ///Refer to [AnimatedList.padding]
   final EdgeInsetsGeometry padding;
+  ///Refer to [AnimatedList.physics]
   final ScrollPhysics physics;
+  ///Refer to [AnimatedList.primary]
   final bool primary;
+  ///Refer to [AnimatedList.reverse]
   final bool reverse;
+  ///Refer to [AnimatedList.shrinkWrap]
   final bool shrinkWrap;
 
   const DeclarativeList(
