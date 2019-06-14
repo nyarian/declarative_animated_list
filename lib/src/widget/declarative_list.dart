@@ -93,7 +93,9 @@ class _DeclarativeListState<T> extends State<DeclarativeList<T>> {
       initialItemCount: widget.initialItemCount,
       itemBuilder: (final BuildContext context, final int index,
               final Animation<double> animation) =>
-          this.widget.itemBuilder(context, this.widget.items[index], animation),
+          this
+              .widget
+              .itemBuilder(context, this.widget.items[index], index, animation),
       scrollDirection: widget.scrollDirection,
       controller: widget.scrollController,
       padding: widget.padding,
@@ -148,7 +150,7 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
   void _removeItem(final int index) {
     final AnimatedListRemovedItemBuilder builder =
         (final BuildContext context, final Animation<double> animation) =>
-            this.removeBuilder(context, oldList[index], animation);
+            this.removeBuilder(context, oldList[index], index, animation);
     if (removeDuration != null) {
       state.removeItem(index, builder, duration: removeDuration);
     } else {
@@ -158,4 +160,4 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
 }
 
 typedef AnimatedItemBuilder<T> = Widget Function(
-    BuildContext context, T item, Animation<double> animation);
+    BuildContext context, T item, int index, Animation<double> animation);
