@@ -51,7 +51,7 @@ class _DeclarativeListState<T> extends State<DeclarativeList> {
   void didUpdateWidget(final DeclarativeList oldWidget) {
     super.didUpdateWidget(oldWidget);
     final DifferenceResult result = MyersDifferenceAlgorithm().differentiate(
-        ListsCallback(oldWidget.items, this.widget.items));
+        ListsDifferenceRequest(oldWidget.items, this.widget.items));
     result.dispatchUpdates(_AnimatedListDifferenceConsumer(
         this._animatedListKey.currentState,
         this.widget.items,
@@ -109,25 +109,4 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
       this.onMoved(i, i);
     }
   }
-}
-
-class ListsCallback<T> extends DifferenceRequest {
-
-  final List<T> oldList;
-  final List<T> newList;
-
-
-  ListsCallback(this.oldList, this.newList);
-
-  @override
-  bool areEqual(int oldPosition, int newPosition) {
-    return oldList[oldPosition] == newList[newPosition];
-  }
-
-  @override
-  int get newSize => newList.length;
-
-  @override
-  int get oldSize => oldList.length;
-
 }

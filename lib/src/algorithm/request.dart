@@ -4,23 +4,16 @@ abstract class DifferenceRequest {
   int get newSize;
 
   bool areEqual(final int oldPosition, final int newPosition);
-
 }
 
 class ListsDifferenceRequest<T> implements DifferenceRequest {
   final List<T> old;
   final List<T> updated;
-  final EqualityCheck<T> identityCheck;
   final EqualityCheck<T> equalityCheck;
-  final PayloadDefinition<T> payloadDefinition;
 
   ListsDifferenceRequest(this.old, this.updated,
-      {final EqualityCheck<T> identityCheck,
-      final EqualityCheck<T> equalityCheck,
-      final PayloadDefinition<T> payloadDefinition})
-      : this.identityCheck = identityCheck ?? _equalsOperatorCheck,
-        this.equalityCheck = equalityCheck ?? _equalsOperatorCheck,
-        this.payloadDefinition = payloadDefinition ?? ((_, __) => null);
+      {final EqualityCheck<T> equalityCheck})
+      : this.equalityCheck = equalityCheck ?? _equalsOperatorCheck;
 
   @override
   int get oldSize => old.length;
@@ -30,9 +23,8 @@ class ListsDifferenceRequest<T> implements DifferenceRequest {
 
   @override
   bool areEqual(final int oldPosition, final int newPosition) {
-    return identityCheck(old[oldPosition], updated[newPosition]);
+    return equalityCheck(old[oldPosition], updated[newPosition]);
   }
-
 }
 
 final EqualityCheck<Object> _equalsOperatorCheck =

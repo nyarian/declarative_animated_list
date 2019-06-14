@@ -1,7 +1,7 @@
 import 'package:declarative_animated_list/src/algorithm/myers/myer.dart';
 import 'package:declarative_animated_list/src/algorithm/myers/result.dart';
+import 'package:declarative_animated_list/src/algorithm/request.dart';
 import 'package:declarative_animated_list/src/algorithm/result.dart';
-import 'package:declarative_animated_list/src/widget/declarative_list.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test_api/test_api.dart';
 
@@ -92,7 +92,7 @@ void main() {
 }
 
 MyersDifferenceResult calculateWithLists<T>(final List<T> old, final List<T> updated) {
-  return MyersDifferenceAlgorithm().differentiate(ListsCallback(old, updated));
+  return MyersDifferenceAlgorithm().differentiate(ListsDifferenceRequest(old, updated));
 }
 
 class MockListUpdateCallback extends Mock implements DifferenceConsumer {}
