@@ -77,8 +77,8 @@ class _DeclarativeListState<T> extends State<DeclarativeList<T>> {
     return AnimatedList(
       key: _animatedListKey,
       initialItemCount: widget.initialItemCount,
-      itemBuilder: (BuildContext context, int index,
-              Animation<double> animation) =>
+      itemBuilder: (final BuildContext context, final int index,
+              final Animation<double> animation) =>
           this.widget.itemBuilder(context, this.widget.items[index], animation),
       scrollDirection: widget.scrollDirection,
       controller: widget.scrollController,
