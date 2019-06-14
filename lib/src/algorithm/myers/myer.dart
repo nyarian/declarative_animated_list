@@ -157,7 +157,7 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
 // move diagonal as long as items match
         while (x < oldSize &&
             y < newSize &&
-            request.isTheSameConceptualEntity(startOld + x, startNew + y)) {
+            request.areEqual(startOld + x, startNew + y)) {
           x++;
           y++;
         }
@@ -192,7 +192,7 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
 // move diagonal as long as items match
         while (x > 0 &&
             y > 0 &&
-            request.isTheSameConceptualEntity(
+            request.areEqual(
                 startOld + x - 1, startNew + y - 1)) {
           x--;
           y--;

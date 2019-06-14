@@ -121,12 +121,7 @@ class ListsCallback<T> extends DifferenceRequest {
   ListsCallback(this.oldList, this.newList);
 
   @override
-  bool areInstancesEqual(int oldPosition, int newPosition) {
-    return oldList[oldPosition] == newList[newPosition];
-  }
-
-  @override
-  bool isTheSameConceptualEntity(int oldPosition, int newPosition) {
+  bool areEqual(int oldPosition, int newPosition) {
     return oldList[oldPosition] == newList[newPosition];
   }
 

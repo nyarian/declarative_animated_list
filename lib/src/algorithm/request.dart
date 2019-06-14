@@ -3,11 +3,8 @@ abstract class DifferenceRequest {
 
   int get newSize;
 
-  bool isTheSameConceptualEntity(final int oldPosition, final int newPosition);
+  bool areEqual(final int oldPosition, final int newPosition);
 
-  bool areInstancesEqual(final int oldPosition, final int newPosition);
-
-  Object getChangePayload(final int oldPosition, final int newPosition) => null;
 }
 
 class ListsDifferenceRequest<T> implements DifferenceRequest {
@@ -32,19 +29,10 @@ class ListsDifferenceRequest<T> implements DifferenceRequest {
   int get newSize => updated.length;
 
   @override
-  bool isTheSameConceptualEntity(final int oldPosition, final int newPosition) {
+  bool areEqual(final int oldPosition, final int newPosition) {
     return identityCheck(old[oldPosition], updated[newPosition]);
   }
 
-  @override
-  bool areInstancesEqual(final int oldPosition, final int newPosition) {
-    return equalityCheck(old[oldPosition], updated[newPosition]);
-  }
-
-  @override
-  Object getChangePayload(final int oldPosition, final int newPosition) {
-    return payloadDefinition(old[oldPosition], updated[newPosition]);
-  }
 }
 
 final EqualityCheck<Object> _equalsOperatorCheck =

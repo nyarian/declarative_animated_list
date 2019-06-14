@@ -6,26 +6,8 @@ class MyersDifferenceResult implements DifferenceResult {
   ///Signifies an item not present in the list.
   static const int _no_position = -1;
 
-  ///
-  ///While reading the flags below, keep in mind that when multiple items move in a list,
-  ///Myers's may pick any of them as the anchor item and consider that one NOT_CHANGED while
-  ///picking others as additions and removals. This is completely fine as we later detect
-  ///all moves.
-  ///Below, when an item is mentioned to stay in the same "location", it means we won't
-  ///dispatch a move/add/remove for it, it DOES NOT mean the item is still in the same
-  ///position.
-  ///
-  // item stayed the same.
-  static const int _flag_not_changed = 1;
-
-  // item stayed in the same location but changed.
-  static const int _flag_changed = _flag_not_changed << 1;
-
-  // Item has moved and also changed.
-  static const int _flag_moved_changed = _flag_changed << 1;
-
   // Item has moved but did not change.
-  static const int _flag_moved_not_changed = _flag_moved_changed << 1;
+  static const int _flag_moved = 1;
 
   // Ignore this update.
   // If this is an addition from the new list, it means the item is actually removed from an
@@ -34,7 +16,7 @@ class MyersDifferenceResult implements DifferenceResult {
   // If this is a removal from the old list, it means the item is actually added back to an
   // earlier index in the new list and we'll dispatch its move when we are processing that
   // addition.
-  static const int _flag_ignore = _flag_moved_not_changed << 1;
+  static const int _flag_ignore = _flag_moved << 1;
 
   // since we are re-using the int arrays that were created in the Myers' step, we mask
   // change flags
@@ -114,17 +96,6 @@ class MyersDifferenceResult implements DifferenceResult {
           posNew--;
         }
       }
-      for (int j = 0; j < snake.size; j++) {
-        // matching items. Check if it is changed or not
-        final int oldItemPos = snake.x + j;
-        final int newItemPos = snake.y + j;
-        final bool theSame = _request.areInstancesEqual(oldItemPos, newItemPos);
-        final int changeFlag = theSame ? _flag_not_changed : _flag_changed;
-        _oldItemStatuses[oldItemPos] =
-            (newItemPos << _flag_offset) | changeFlag;
-        _newItemStatuses[newItemPos] =
-            (oldItemPos << _flag_offset) | changeFlag;
-      }
       posOld = snake.x;
       posNew = snake.y;
     }
@@ -197,26 +168,20 @@ class MyersDifferenceResult implements DifferenceResult {
       if (removal) {
         // check removals for a match
         for (int pos = curX - 1; pos >= endX; pos--) {
-          if (_request.isTheSameConceptualEntity(pos, myItemPos)) {
-            // found!
-            final bool theSame = _request.areInstancesEqual(pos, myItemPos);
-            final int changeFlag =
-                theSame ? _flag_moved_not_changed : _flag_moved_changed;
+          if (_request.areEqual(pos, myItemPos)) {
             _newItemStatuses[myItemPos] = (pos << _flag_offset) | _flag_ignore;
-            _oldItemStatuses[pos] = (myItemPos << _flag_offset) | changeFlag;
+            _oldItemStatuses[pos] =
+                (myItemPos << _flag_offset) | _flag_moved;
             return true;
           }
         }
       } else {
         // check for additions for a match
         for (int pos = curY - 1; pos >= endY; pos--) {
-          if (_request.isTheSameConceptualEntity(myItemPos, pos)) {
+          if (_request.areEqual(myItemPos, pos)) {
             // found
-            final bool theSame = _request.areInstancesEqual(myItemPos, pos);
-            final int changeFlag =
-                theSame ? _flag_moved_not_changed : _flag_moved_changed;
             _oldItemStatuses[x - 1] = (pos << _flag_offset) | _flag_ignore;
-            _newItemStatuses[pos] = ((x - 1) << _flag_offset) | changeFlag;
+            _newItemStatuses[pos] = ((x - 1) << _flag_offset) | _flag_moved;
             return true;
           }
         }
@@ -254,12 +219,6 @@ class MyersDifferenceResult implements DifferenceResult {
       if (endY < posNew) {
         _dispatchAdditions(
             postponedUpdates, batchingCallback, endX, posNew - endY, endY);
-      }
-      for (int i = snakeSize - 1; i >= 0; i--) {
-        if ((_oldItemStatuses[snake.x + i] & _flag_mask) == _flag_changed) {
-          batchingCallback.onChanged(snake.x + i, 1,
-              _request.getChangePayload(snake.x + i, snake.y + i));
-        }
       }
       posOld = snake.x;
       posNew = snake.y;
@@ -299,19 +258,13 @@ class MyersDifferenceResult implements DifferenceResult {
               update.currentPos += 1;
             }
             break;
-          case _flag_moved_changed:
-          case _flag_moved_not_changed:
+          case _flag_moved:
             final int pos = _newItemStatuses[globalIndex + i] >> _flag_offset;
             final _PostponedUpdate update =
                 _removePostponedUpdate(postponedUpdates, pos, true);
             // the item was moved from that position
             //noinspection ConstantConditions
             updateCallback.onMoved(update.currentPos, start);
-            if (status == _flag_moved_changed) {
-              // also dispatch a change
-              updateCallback.onChanged(
-                  start, 1, _request.getChangePayload(pos, globalIndex + i));
-            }
             break;
           case _flag_ignore: // ignoring this
             postponedUpdates
@@ -343,8 +296,7 @@ class MyersDifferenceResult implements DifferenceResult {
               update.currentPos -= 1;
             }
             break;
-          case _flag_moved_changed:
-          case _flag_moved_not_changed:
+          case _flag_moved:
             final int pos = _oldItemStatuses[globalIndex + i] >> _flag_offset;
             final _PostponedUpdate update =
                 _removePostponedUpdate(postponedUpdates, pos, false);
@@ -352,11 +304,6 @@ class MyersDifferenceResult implements DifferenceResult {
             // add and removing current item offsets the target move by 1
             //noinspection ConstantConditions
             updateCallback.onMoved(start + i, update.currentPos - 1);
-            if (status == _flag_moved_changed) {
-              // also dispatch a change
-              updateCallback.onChanged(update.currentPos - 1, 1,
-                  _request.getChangePayload(globalIndex + i, pos));
-            }
             break;
           case _flag_ignore: // ignoring this
             postponedUpdates
