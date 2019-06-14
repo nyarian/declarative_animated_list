@@ -4,7 +4,7 @@ description: An implementation of animated list widget that will be automaticall
 version: 0.0.1
 authors:
   - Andrii Iliunin <orkay255@gmail.com>
-  - New Line Technologies
+  - New Line Technologies <a.iliunin@newlinetechnologies.net>
 homepage: https://github.com/nyarian/declarative_animated_list
 repository: https://bitbucket.org/ilyunin111/declarative_animated_list
 issue_tracker: https://github.com/nyarian/declarative_animated_list/issues
