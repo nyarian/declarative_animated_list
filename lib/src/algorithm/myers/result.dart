@@ -378,15 +378,9 @@ class MyersDifferenceResult implements DifferenceResult {
 }
 
 class PostponedUpdate {
-  int posInOwnerList = 0;
+  int currentPos;
+  final int posInOwnerList;
+  final bool removal;
 
-  int currentPos = 0;
-
-  bool removal = false;
-
-  PostponedUpdate(int posInOwnerList, int currentPos, bool removal) {
-    this.posInOwnerList = posInOwnerList;
-    this.currentPos = currentPos;
-    this.removal = removal;
-  }
+  PostponedUpdate(this.posInOwnerList, this.currentPos, this.removal);
 }

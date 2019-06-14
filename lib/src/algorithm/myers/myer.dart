@@ -30,7 +30,8 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
   ///[detectMoves] True if algorithm implementation should try to detect moved items, false otherwise.
   ///Returns a [Result] that contains the information about the edit sequence to convert the
   ///old list into the new list.
-  DifferenceResult calculateDifference(final DifferenceRequest request, final bool detectMoves) {
+  DifferenceResult calculateDifference(
+      final DifferenceRequest request, final bool detectMoves) {
     final int oldSize = request.oldSize;
     final int newSize = request.newSize;
 
@@ -53,8 +54,15 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
     final List<Range> rangePool = new List();
     while (stack.isNotEmpty) {
       final Range range = stack.removeAt(stack.length - 1);
-      final Snake snake = diffPartial(request, range.oldListStart, range.oldListEnd,
-          range.newListStart, range.newListEnd, forward, backward, max);
+      final Snake snake = diffPartial(
+          request,
+          range.oldListStart,
+          range.oldListEnd,
+          range.newListStart,
+          range.newListEnd,
+          forward,
+          backward,
+          max);
       if (snake != null) {
         if (snake.size > 0) {
           snakes.add(snake);
@@ -104,11 +112,19 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
       }
     }
     snakes.sort(snakeComparator);
-    return new MyersDifferenceResult(request, snakes, forward, backward, detectMoves);
+    return new MyersDifferenceResult(
+        request, snakes, forward, backward, detectMoves);
   }
 
-  Snake diffPartial(final DifferenceRequest request, int startOld, int endOld, int startNew,
-      int endNew, List<int> forward, List<int> backward, int kOffset) {
+  Snake diffPartial(
+      final DifferenceRequest request,
+      int startOld,
+      int endOld,
+      int startNew,
+      int endNew,
+      List<int> forward,
+      List<int> backward,
+      int kOffset) {
     final int oldSize = endOld - startOld;
     final int newSize = endNew - startNew;
 
@@ -176,7 +192,8 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
 // move diagonal as long as items match
         while (x > 0 &&
             y > 0 &&
-            request.isTheSameConceptualEntity(startOld + x - 1, startNew + y - 1)) {
+            request.isTheSameConceptualEntity(
+                startOld + x - 1, startNew + y - 1)) {
           x--;
           y--;
         }
@@ -198,76 +215,15 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
   }
 }
 
-///A Callback class used by algorithm implementation while calculating the
-///difference between two lists.
-abstract class Callback {
-  ///Returns the size of the old list.
-  int getOldListSize();
-
-  ///Returns the size of the new list.
-  int getNewListSize();
-
-  ///Called by the algorithm implementation to decide whether two object represent the same item.
-  ///For example, if your items have unique ids, this method should check their id equality.
-  ///[oldItemPosition] The position of the item in the old list
-  ///[newItemPosition] The position of the item in the new list
-  ///Returns true if the two items represent the same object or false if they are different.
-  bool areItemsTheSame(int oldItemPosition, int newItemPosition);
-
-  ///Called by the algorithm implementation when it wants to check whether two items have the same data.
-  ///Algorithm implementation uses this information to detect if the contents of an item has changed.
-  ///Algorithm implementation uses this method to check equality instead of [==]
-  ///so that you can change its behavior depending on your UI.
-  ///This method is called only if [areItemsTheSame] returns true for these items.
-  ///[oldItemPosition] - the position of the item in the old list
-  ///[newItemPosition] - the position of the item in the new list which replaces the oldItem
-  ///@return True if the contents of the items are the same or false if they are different.
-  bool areContentsTheSame(int oldItemPosition, int newItemPosition);
-
-  ///
-  ///When [areItemsTheSame] returns true for two items and
-  ///[areContentsTheSame] returns false for them, algorithm implementation
-  ///calls this method to get a payload about the change.
-  ///Default implementation returns null
-  ///[oldItemPosition] The position of the item in the old list
-  ///[newItemPosition] The position of the item in the new list
-  ///Returns A payload object that represents the change between the two items.
-  getChangePayload(int oldItemPosition, int newItemPosition) {
-    return null;
-  }
-}
-
 ///Represents a range in two lists that needs to be solved.
 ///This internal class is used when running Myers' algorithm without recursion.
 class Range {
-  int oldListStart = 0, oldListEnd = 0;
-
-  int newListStart = 0, newListEnd = 0;
+  int oldListStart;
+  int oldListEnd;
+  int newListStart;
+  int newListEnd;
 
   Range.empty() : this(0, 0, 0, 0);
 
-  Range(int oldListStart, int oldListEnd, int newListStart, int newListEnd) {
-    this.oldListStart = oldListStart;
-    this.oldListEnd = oldListEnd;
-    this.newListStart = newListStart;
-    this.newListEnd = newListEnd;
-  }
-}
-
-///Represents an update that we skipped because it was a move.
-///When an update is skipped, it is tracked as other updates are dispatched until the matching
-///add/remove operation is found at which point the tracked position is used to dispatch the
-///update.
-class PostponedUpdate {
-  int posInOwnerList = 0;
-
-  int currentPos = 0;
-
-  bool removal = false;
-
-  PostponedUpdate(int posInOwnerList, int currentPos, bool removal) {
-    this.posInOwnerList = posInOwnerList;
-    this.currentPos = currentPos;
-    this.removal = removal;
-  }
+  Range(this.oldListStart, this.oldListEnd, this.newListStart, this.newListEnd);
 }
