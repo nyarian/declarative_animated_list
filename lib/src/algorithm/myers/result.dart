@@ -118,8 +118,7 @@ class MyersDifferenceResult implements DifferenceResult {
         // matching items. Check if it is changed or not
         final int oldItemPos = snake.x + j;
         final int newItemPos = snake.y + j;
-        final bool theSame =
-            _request.areInstancesEqual(oldItemPos, newItemPos);
+        final bool theSame = _request.areInstancesEqual(oldItemPos, newItemPos);
         final int changeFlag = theSame ? flag_not_changed : flag_changed;
         mOldItemStatuses[oldItemPos] = (newItemPos << flag_offset) | changeFlag;
         mNewItemStatuses[newItemPos] = (oldItemPos << flag_offset) | changeFlag;
@@ -147,7 +146,7 @@ class MyersDifferenceResult implements DifferenceResult {
   ///[no_position] if it was removed.
   ///[oldListPosition] is position of item in old list
   ///Returns the position of item in new list, or [no_position] if not present.
-  convertOldPositionToNew(int oldListPosition) {
+  int convertOldPositionToNew(int oldListPosition) {
     if (oldListPosition < 0 || oldListPosition >= mOldItemStatuses.length) {
       throw new RangeError(
           "Index out of bounds - passed position = $oldListPosition, old list "
@@ -165,7 +164,7 @@ class MyersDifferenceResult implements DifferenceResult {
   ///[no_position] if it was removed.
   ///[newListPosition] - position of item in new list
   ///Returns the position of item in old list, or {@code NO_POSITION} if not present.
-  convertNewPositionToOld(int newListPosition) {
+  int convertNewPositionToOld(int newListPosition) {
     if (newListPosition < 0 || newListPosition >= mNewItemStatuses.length) {
       throw new RangeError(
           "Index out of bounds - passed position = $newListPosition, new list "
@@ -186,20 +185,11 @@ class MyersDifferenceResult implements DifferenceResult {
   ///[snakeIndex] The current snake index
   ///[removal] - true if we are looking for a removal, false otherwise
   ///Returns true if such item is found.
-  findMatchingItem(
+  bool findMatchingItem(
       final int x, final int y, final int snakeIndex, final bool removal) {
-    int myItemPos;
-    int curX;
-    int curY;
-    if (removal) {
-      myItemPos = y - 1;
-      curX = x;
-      curY = y - 1;
-    } else {
-      myItemPos = x - 1;
-      curX = x - 1;
-      curY = y;
-    }
+    final int myItemPos = removal ? y - 1 : x - 1;
+    int curX = removal ? x : x - 1;
+    int curY = removal ? y - 1 : y;
     for (int i = snakeIndex; i >= 0; i--) {
       final Snake snake = mSnakes[i];
       final int endX = snake.x + snake.size;
@@ -244,7 +234,8 @@ class MyersDifferenceResult implements DifferenceResult {
   /// [updateCallback] -  The callback to receive the update operations.
   @override
   void dispatchUpdates(DifferenceConsumer updateCallback) {
-    final BatchingListUpdateCallback batchingCallback = updateCallback.batching();
+    final BatchingListUpdateCallback batchingCallback =
+        updateCallback.batching();
     // These are add/remove ops that are converted to moves. We track their positions until
     // their respective update operations are processed.
     final List<PostponedUpdate> postponedUpdates = new List();
