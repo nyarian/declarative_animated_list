@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:reactive_list/src/algorithm/myers/myer.dart';
-import 'package:reactive_list/src/algorithm/request.dart';
-import 'package:reactive_list/src/algorithm/result.dart';
+import 'package:declarative_animated_list/src/algorithm/myers/myer.dart';
+import 'package:declarative_animated_list/src/algorithm/request.dart';
+import 'package:declarative_animated_list/src/algorithm/result.dart';
 
 class ReactiveList<T> extends StatefulWidget {
   final List<T> items;

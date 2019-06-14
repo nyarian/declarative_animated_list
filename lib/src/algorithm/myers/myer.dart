@@ -1,8 +1,8 @@
-import 'package:reactive_list/src/algorithm/myers/result.dart';
-import 'package:reactive_list/src/algorithm/myers/snake.dart';
-import 'package:reactive_list/src/algorithm/request.dart';
-import 'package:reactive_list/src/algorithm/result.dart';
-import 'package:reactive_list/src/algorithm/strategy.dart';
+import 'package:declarative_animated_list/src/algorithm/myers/result.dart';
+import 'package:declarative_animated_list/src/algorithm/myers/snake.dart';
+import 'package:declarative_animated_list/src/algorithm/request.dart';
+import 'package:declarative_animated_list/src/algorithm/result.dart';
+import 'package:declarative_animated_list/src/algorithm/strategy.dart';
 
 class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
   @override

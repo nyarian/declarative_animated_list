@@ -1,8 +1,8 @@
-name: reactive_list
-description: An implementation of animated list widget that will be reactively updated based on lists snippets.
+name: declarative_animated_list
+description: An implementation of animated list widget that will be automatically updated based on different lists snippets.
 version: 0.0.1
-author:
-homepage:
+author: Andrii Iliunin
+homepage: https://github.com/nyarian
 
 environment:
   sdk: ">=2.1.0 <3.0.0"

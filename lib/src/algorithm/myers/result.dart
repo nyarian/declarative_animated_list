@@ -1,6 +1,6 @@
-import 'package:reactive_list/src/algorithm/myers/snake.dart';
-import 'package:reactive_list/src/algorithm/request.dart';
-import 'package:reactive_list/src/algorithm/result.dart';
+import 'package:declarative_animated_list/src/algorithm/myers/snake.dart';
+import 'package:declarative_animated_list/src/algorithm/request.dart';
+import 'package:declarative_animated_list/src/algorithm/result.dart';
 
 class MyersDifferenceResult implements DifferenceResult {
   /// Signifies an item not present in the list.
