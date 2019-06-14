@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:declarative_animated_list/src/algorithm/myers/myer.dart';
 
-
-class ReactiveList<T> extends StatefulWidget {
+class DeclarativeList<T> extends StatefulWidget {
   final List<T> items;
   final AnimatedListItemBuilder itemBuilder;
   final AnimatedListRemovedItemBuilder removeBuilder;
@@ -18,7 +17,7 @@ class ReactiveList<T> extends StatefulWidget {
   final bool reverse;
   final bool shrinkWrap;
 
-  const ReactiveList(
+  const DeclarativeList(
       {final Key key,
       @required this.items,
       @required this.itemBuilder,
@@ -34,10 +33,10 @@ class ReactiveList<T> extends StatefulWidget {
         super(key: key);
 
   @override
-  _ReactiveListState<T> createState() => _ReactiveListState();
+  _DeclarativeListState<T> createState() => _DeclarativeListState();
 }
 
-class _ReactiveListState<T> extends State<ReactiveList> {
+class _DeclarativeListState<T> extends State<DeclarativeList> {
   final GlobalKey<AnimatedListState> _animatedListKey =
       GlobalKey<AnimatedListState>();
   List<T> items;
@@ -49,7 +48,7 @@ class _ReactiveListState<T> extends State<ReactiveList> {
   }
 
   @override
-  void didUpdateWidget(final ReactiveList oldWidget) {
+  void didUpdateWidget(final DeclarativeList oldWidget) {
     super.didUpdateWidget(oldWidget);
     final DifferenceResult result = MyersDifferenceAlgorithm().differentiate(
         ListsCallback(oldWidget.items, this.widget.items));

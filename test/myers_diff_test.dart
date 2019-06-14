@@ -1,7 +1,7 @@
 import 'package:declarative_animated_list/src/algorithm/myers/myer.dart';
 import 'package:declarative_animated_list/src/algorithm/myers/result.dart';
 import 'package:declarative_animated_list/src/algorithm/result.dart';
-import 'package:declarative_animated_list/src/reactive_list.dart';
+import 'package:declarative_animated_list/src/widget/declarative_list.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test_api/test_api.dart';
 
