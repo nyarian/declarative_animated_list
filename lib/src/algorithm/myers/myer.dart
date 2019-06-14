@@ -19,7 +19,7 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
   ///old list into the new list.
   @override
   DifferenceResult differentiate(final DifferenceRequest request) {
-    return calculateDifference(request, true);
+    return _calculateDifference(request, true);
   }
 
   ///Calculates the list of update operations that can covert one list into the other one.
@@ -30,7 +30,7 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
   ///[detectMoves] True if algorithm implementation should try to detect moved items, false otherwise.
   ///Returns a [Result] that contains the information about the edit sequence to convert the
   ///old list into the new list.
-  DifferenceResult calculateDifference(
+  DifferenceResult _calculateDifference(
       final DifferenceRequest request, final bool detectMoves) {
     final int oldSize = request.oldSize;
     final int newSize = request.newSize;
@@ -54,7 +54,7 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
     final List<Range> rangePool = new List();
     while (stack.isNotEmpty) {
       final Range range = stack.removeAt(stack.length - 1);
-      final Snake snake = diffPartial(
+      final Snake snake = _diffPartial(
           request,
           range.oldListStart,
           range.oldListEnd,
@@ -116,7 +116,7 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
         request, snakes, forward, backward, detectMoves);
   }
 
-  Snake diffPartial(
+  Snake _diffPartial(
       final DifferenceRequest request,
       int startOld,
       int endOld,
