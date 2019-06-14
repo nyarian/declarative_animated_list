@@ -1,4 +1,5 @@
 import 'package:declarative_animated_list/src/algorithm/myers/result.dart';
+import 'package:declarative_animated_list/src/algorithm/myers/snake.dart';
 
 class MyersDifferenceAlgorithm {
   final Comparator<Snake> snakeComparator = (o1, o2) {
@@ -230,31 +231,6 @@ abstract class Callback {
   getChangePayload(int oldItemPosition, int newItemPosition) {
     return null;
   }
-}
-
-///Snakes represent a match between two lists. It is optionally prefixed or post-fixed with an
-///add or remove operation. See the Myers' paper for details.
-class Snake {
-  ///Position in the old list
-  int x;
-
-  ///Position in the new list
-  int y;
-
-  ///Number of matches. Might be 0.
-  final int size;
-
-  ///If true, this is a removal from the original list followed by {@code size} matches.
-  ///If false, this is an addition from the new list followed by {@code size} matches.
-  final bool removal;
-
-  ///If true, the addition or removal is at the end of the snake.
-  ///If false, the addition or removal is at the beginning of the snake.
-  final bool reverse;
-
-  Snake(this.x, this.y, this.size, this.removal, this.reverse);
-
-  Snake.empty() : this(0, 0, 0, false, false);
 }
 
 ///Represents a range in two lists that needs to be solved.

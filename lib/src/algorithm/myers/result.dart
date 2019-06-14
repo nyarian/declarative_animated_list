@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:declarative_animated_list/src/algorithm/myers/myer.dart';
+import 'package:declarative_animated_list/src/algorithm/myers/snake.dart';
 
 class DiffResult {
   ///Signifies an item not present in the list.
