@@ -1,8 +1,8 @@
 import 'package:declarative_animated_list/src/algorithm/request.dart';
 import 'package:declarative_animated_list/src/algorithm/result.dart';
+import 'package:declarative_animated_list/src/algorithm/strategy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:declarative_animated_list/src/algorithm/myers/myer.dart';
 
 class DeclarativeList<T> extends StatefulWidget {
   final List<T> items;
@@ -54,12 +54,17 @@ class _DeclarativeListState<T> extends State<DeclarativeList<T>> {
   @override
   void didUpdateWidget(final DeclarativeList<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final DifferenceResult result = MyersDifferenceAlgorithm().differentiate(
-        ListsDifferenceRequest(oldWidget.items, this.widget.items));
+    _updateList(oldWidget.items, this.widget.items);
+  }
+
+  void _updateList(final List<T> oldList, final List<T> newList) {
+    final DifferenceResult result = DifferentiatingStrategyFactory()
+        .create()
+        .differentiate(ListsDifferenceRequest(oldList, newList));
     final DifferenceConsumer consumer = _AnimatedListDifferenceConsumer<T>(
       this._animatedListKey.currentState,
-      oldWidget.items,
-      this.widget.items,
+      oldList,
+      newList,
       this.widget.removeBuilder,
       removeDuration: this.widget.removeDuration,
       insertDuration: this.widget.insertDuration,
