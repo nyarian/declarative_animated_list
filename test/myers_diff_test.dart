@@ -3,7 +3,7 @@ import 'package:declarative_animated_list/src/algorithm/myers/result.dart';
 import 'package:declarative_animated_list/src/algorithm/request.dart';
 import 'package:declarative_animated_list/src/algorithm/result.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test_api/test_api.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   MockListUpdateCallback callback;
