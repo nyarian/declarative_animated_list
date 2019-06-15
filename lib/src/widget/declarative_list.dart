@@ -21,28 +21,44 @@ import 'package:declarative_animated_list/src/algorithm/strategy.dart';
 class DeclarativeList<T> extends StatefulWidget {
   ///Set of items to be displayed in the list
   final List<T> items;
+
   ///Builder function for inserted items
   final AnimatedItemBuilder<T> itemBuilder;
+
   ///Builder function for removed items
   final AnimatedItemBuilder<T> removeBuilder;
+
+  ///Callback that is used to determine if two given objects are equal. [==]
+  ///operator will be used by default.
+  final EqualityCheck<T> equalityCheck;
+
   ///Initial items count for the list, gets defined automatically
   final int initialItemCount;
+
   ///Refer to [AnimatedListState.insertItem]
   final Duration insertDuration;
+
   ///Refer to [AnimatedListState.removeItem]
   final Duration removeDuration;
+
   ///Refer to [AnimatedList.scrollDirection]
   final Axis scrollDirection;
+
   ///Refer to [AnimatedList.scrollController]
   final ScrollController scrollController;
+
   ///Refer to [AnimatedList.padding]
   final EdgeInsetsGeometry padding;
+
   ///Refer to [AnimatedList.physics]
   final ScrollPhysics physics;
+
   ///Refer to [AnimatedList.primary]
   final bool primary;
+
   ///Refer to [AnimatedList.reverse]
   final bool reverse;
+
   ///Refer to [AnimatedList.shrinkWrap]
   final bool shrinkWrap;
 
@@ -51,6 +67,7 @@ class DeclarativeList<T> extends StatefulWidget {
       @required this.items,
       @required this.itemBuilder,
       @required this.removeBuilder,
+      this.equalityCheck,
       this.scrollDirection = Axis.vertical,
       this.insertDuration,
       this.removeDuration,
@@ -87,7 +104,8 @@ class _DeclarativeListState<T> extends State<DeclarativeList<T>> {
   void _updateList(final List<T> oldList, final List<T> newList) {
     final DifferenceResult result = DifferentiatingStrategyFactory()
         .create()
-        .differentiate(ListsDifferenceRequest(oldList, newList));
+        .differentiate(ListsDifferenceRequest(oldList, newList,
+            equalityCheck: this.widget.equalityCheck));
     final DifferenceConsumer consumer = _AnimatedListDifferenceConsumer<T>(
       this._animatedListKey.currentState,
       oldList,

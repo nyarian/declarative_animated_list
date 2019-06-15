@@ -1,9 +1,3 @@
-import 'dart:math';
-
-abstract class DifferenceResult {
-  void dispatchUpdates(DifferenceConsumer consumer);
-}
-
 //  Copyright 2019 nyarian
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +11,12 @@ abstract class DifferenceResult {
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
+
+import 'dart:math';
+
+abstract class DifferenceResult {
+  void dispatchUpdates(DifferenceConsumer consumer);
+}
 
 abstract class DifferenceConsumer {
   void onInserted(int position, int count);
@@ -32,65 +32,62 @@ class BatchingListUpdateCallback implements DifferenceConsumer {
   static const int type_none = 0;
   static const int type_add = 1;
   static const int type_remove = 2;
-  final DifferenceConsumer mWrapped;
-  int mLastEventType = type_none;
-  int mLastEventPosition = -1;
-  int mLastEventCount = -1;
-  Object mLastEventPayload;
+  final DifferenceConsumer _delegate;
+  int _lastEventType = type_none;
+  int _lastEventPosition = -1;
+  int _lastEventCount = -1;
 
-  BatchingListUpdateCallback(this.mWrapped);
+  BatchingListUpdateCallback(this._delegate);
 
   void dispatchLastEvent() {
-    if (this.mLastEventType != type_none) {
-      switch (this.mLastEventType) {
+    if (this._lastEventType != type_none) {
+      switch (this._lastEventType) {
         case type_add:
           this
-              .mWrapped
-              .onInserted(this.mLastEventPosition, this.mLastEventCount);
+              ._delegate
+              .onInserted(this._lastEventPosition, this._lastEventCount);
           break;
         case type_remove:
           this
-              .mWrapped
-              .onRemoved(this.mLastEventPosition, this.mLastEventCount);
+              ._delegate
+              .onRemoved(this._lastEventPosition, this._lastEventCount);
           break;
       }
-
-      this.mLastEventPayload = null;
-      this.mLastEventType = type_none;
+      this._lastEventType = type_none;
     }
   }
 
   void onInserted(int position, int count) {
-    if (this.mLastEventType == type_add &&
-        position >= this.mLastEventPosition &&
-        position <= this.mLastEventPosition + this.mLastEventCount) {
-      this.mLastEventCount += count;
-      this.mLastEventPosition = min(position, this.mLastEventPosition);
+    if (this._lastEventType == type_add &&
+        position >= this._lastEventPosition &&
+        position <= this._lastEventPosition + this._lastEventCount) {
+      this._lastEventCount += count;
+      this._lastEventPosition = min(position, this._lastEventPosition);
     } else {
       this.dispatchLastEvent();
-      this.mLastEventPosition = position;
-      this.mLastEventCount = count;
-      this.mLastEventType = type_add;
+      this._lastEventPosition = position;
+      this._lastEventCount = count;
+      this._lastEventType = type_add;
     }
   }
 
   void onRemoved(int position, int count) {
-    if (this.mLastEventType == type_remove &&
-        this.mLastEventPosition >= position &&
-        this.mLastEventPosition <= position + count) {
-      this.mLastEventCount += count;
-      this.mLastEventPosition = position;
+    if (this._lastEventType == type_remove &&
+        this._lastEventPosition >= position &&
+        this._lastEventPosition <= position + count) {
+      this._lastEventCount += count;
+      this._lastEventPosition = position;
     } else {
       this.dispatchLastEvent();
-      this.mLastEventPosition = position;
-      this.mLastEventCount = count;
-      this.mLastEventType = type_remove;
+      this._lastEventPosition = position;
+      this._lastEventCount = count;
+      this._lastEventType = type_remove;
     }
   }
 
   void onMoved(int fromPosition, int toPosition) {
     this.dispatchLastEvent();
-    this.mWrapped.onMoved(fromPosition, toPosition);
+    this._delegate.onMoved(fromPosition, toPosition);
   }
 
 
