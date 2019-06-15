@@ -1,6 +1,6 @@
 name: declarative_animated_list
 description: An implementation of animated list widget that will be automatically updated based on different lists snippets.
-version: 0.0.1
+version: 0.0.2
 authors:
   - Andrii Iliunin <orkay255@gmail.com>
   - New Line Technologies <a.iliunin@newlinetechnologies.net>
