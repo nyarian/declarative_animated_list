@@ -170,8 +170,7 @@ class MyersDifferenceResult implements DifferenceResult {
         for (int pos = curX - 1; pos >= endX; pos--) {
           if (_request.areEqual(pos, myItemPos)) {
             _newItemStatuses[myItemPos] = (pos << _flag_offset) | _flag_ignore;
-            _oldItemStatuses[pos] =
-                (myItemPos << _flag_offset) | _flag_moved;
+            _oldItemStatuses[pos] = (myItemPos << _flag_offset) | _flag_moved;
             return true;
           }
         }

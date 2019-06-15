@@ -90,7 +90,6 @@ class BatchingListUpdateCallback implements DifferenceConsumer {
     this._delegate.onMoved(fromPosition, toPosition);
   }
 
-
   @override
   BatchingListUpdateCallback batching() => this;
 }

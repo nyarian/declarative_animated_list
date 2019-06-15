@@ -49,9 +49,7 @@ void main() {
     verify(callback.onRemoved(1, 2));
   });
 
-  test(
-      'verify that single onMoved was dispatched, case 1',
-      () {
+  test('verify that single onMoved was dispatched, case 1', () {
     final List<int> old = [1, 2, 3];
     final List<int> updated = [1, 3, 2];
     final MyersDifferenceResult diff = calculateWithLists(old, updated);
@@ -59,9 +57,7 @@ void main() {
     verify(callback.onMoved(2, 1));
   });
 
-  test(
-      'verify that single onMoved was dispatched case 2',
-      () {
+  test('verify that single onMoved was dispatched case 2', () {
     final List<int> old = [1, 2, 3];
     final List<int> updated = [3, 1, 2];
     final MyersDifferenceResult diff = calculateWithLists(old, updated);
@@ -69,9 +65,7 @@ void main() {
     verify(callback.onMoved(2, 0));
   });
 
-  test(
-      'verify that single onMoved was dispatched case 3',
-      () {
+  test('verify that single onMoved was dispatched case 3', () {
     final List<int> old = [1, 2, 3];
     final List<int> updated = [2, 1, 3];
     final MyersDifferenceResult diff = calculateWithLists(old, updated);
@@ -79,9 +73,7 @@ void main() {
     verify(callback.onMoved(1, 0));
   });
 
-  test(
-      'verify that double onMoved was dispatched case 1',
-      () {
+  test('verify that double onMoved was dispatched case 1', () {
     final List<int> old = [1, 2, 3, 4];
     final List<int> updated = [2, 1, 4, 3];
     final MyersDifferenceResult diff = calculateWithLists(old, updated);
@@ -91,8 +83,10 @@ void main() {
   });
 }
 
-MyersDifferenceResult calculateWithLists<T>(final List<T> old, final List<T> updated) {
-  return MyersDifferenceAlgorithm().differentiate(ListsDifferenceRequest(old, updated));
+MyersDifferenceResult calculateWithLists<T>(
+    final List<T> old, final List<T> updated) {
+  return MyersDifferenceAlgorithm()
+      .differentiate(ListsDifferenceRequest(old, updated));
 }
 
 class MockListUpdateCallback extends Mock implements DifferenceConsumer {}

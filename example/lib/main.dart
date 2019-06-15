@@ -119,8 +119,9 @@ class ToDosPage extends StatelessWidget {
   Widget _buildFab(final BuildContext context) {
     return FloatingActionButton(
       child: Icon(Icons.add),
-      onPressed: () =>
-          showDialog(context: context, builder: (final BuildContext ctx) {
+      onPressed: () => showDialog(
+          context: context,
+          builder: (final BuildContext ctx) {
             final TextEditingController controller = TextEditingController();
             final Size size = MediaQuery.of(ctx).size;
             return Container(
@@ -133,15 +134,14 @@ class ToDosPage extends StatelessWidget {
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        controller: controller
-                      ),
+                      child: TextField(controller: controller),
                     ),
                     IconButton(
-                      icon: Icon(Icons.check), onPressed: () {
+                      icon: Icon(Icons.check),
+                      onPressed: () {
                         bloc.addToDo.add(AddToDoEvent(controller.text));
                         Navigator.of(ctx).pop();
-                    },
+                      },
                     )
                   ],
                 ),

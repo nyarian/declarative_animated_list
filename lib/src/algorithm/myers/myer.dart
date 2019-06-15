@@ -192,8 +192,7 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
 // move diagonal as long as items match
         while (x > 0 &&
             y > 0 &&
-            request.areEqual(
-                startOld + x - 1, startNew + y - 1)) {
+            request.areEqual(startOld + x - 1, startNew + y - 1)) {
           x--;
           y--;
         }
