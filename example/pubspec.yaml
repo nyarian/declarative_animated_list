@@ -1,6 +1,6 @@
 name: example
 description: An example of how to use the declarative animated list widget.
-
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
