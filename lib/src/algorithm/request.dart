@@ -20,13 +20,13 @@ abstract class DifferenceRequest {
   bool areEqual(final int oldPosition, final int newPosition);
 }
 
-class ListsDifferenceRequest<T> implements DifferenceRequest {
+class ListsDifferenceRequest<T extends Object> implements DifferenceRequest {
   final List<T> old;
   final List<T> updated;
   final EqualityCheck<T> equalityCheck;
 
   ListsDifferenceRequest(this.old, this.updated,
-      {final EqualityCheck<T> equalityCheck})
+      {final EqualityCheck<T>? equalityCheck})
       : this.equalityCheck = equalityCheck ?? _equalsOperatorCheck;
 
   @override

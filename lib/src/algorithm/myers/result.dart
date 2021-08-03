@@ -62,7 +62,7 @@ class MyersDifferenceResult implements DifferenceResult {
   ///We always add a Snake to 0/0 so that we can run loops from end to beginning and be done
   ///when we run out of snakes.
   void _addRootSnake() {
-    Snake firstSnake = _snakes.isEmpty ? null : _snakes[0];
+    Snake? firstSnake = _snakes.isEmpty ? null : _snakes[0];
     if (firstSnake == null || firstSnake.x != 0 || firstSnake.y != 0) {
       _snakes.insert(0, Snake.empty());
     }
@@ -202,7 +202,7 @@ class MyersDifferenceResult implements DifferenceResult {
         updateCallback.batching();
     // These are add/remove ops that are converted to moves. We track their positions until
     // their respective update operations are processed.
-    final List<_PostponedUpdate> postponedUpdates = new List();
+    final List<_PostponedUpdate> postponedUpdates = [];
     int posOld = _oldListSize;
     int posNew = _newListSize;
     for (int snakeIndex = _snakes.length - 1; snakeIndex >= 0; snakeIndex--) {
@@ -238,7 +238,8 @@ class MyersDifferenceResult implements DifferenceResult {
         return update;
       }
     }
-    return null;
+    throw StateError('Expected the postponed update, but did not find any. '
+        'Pos: $pos, removal: $removal, updates: $updates');
   }
 
   void _dispatchAdditions(
