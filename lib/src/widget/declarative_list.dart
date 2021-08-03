@@ -12,11 +12,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:declarative_animated_list/src/algorithm/request.dart';
 import 'package:declarative_animated_list/src/algorithm/result.dart';
 import 'package:declarative_animated_list/src/algorithm/strategy.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class DeclarativeList<T extends Object> extends StatefulWidget {
   ///Set of items to be displayed in the list
@@ -160,7 +160,7 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
 
   @override
   void onRemoved(final int position, final int count) {
-    for (int i = position; i < position + count; i++) {
+    for (int i = position + count - 1; i >= position; i--) {
       _removeItem(i);
     }
   }

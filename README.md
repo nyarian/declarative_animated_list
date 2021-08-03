@@ -44,7 +44,7 @@ And... that's it!
 
 ```yaml
 dependencies:
-  declarative_animated_list: ^0.0.1
+  declarative_animated_list: ^0.1.0-nullsafety.0
 ```
 
 #### 2. Import it
