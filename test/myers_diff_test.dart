@@ -4,9 +4,9 @@ import 'package:declarative_animated_list/src/algorithm/result.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  late MockListUpdateCallback callback;
+  late FakeListUpdateCallback callback;
 
-  setUp(() => callback = MockListUpdateCallback());
+  setUp(() => callback = FakeListUpdateCallback());
 
   test('verify that single onInserted was dispatched with count 1', () {
     final List<int> old = [1, 3];
@@ -38,6 +38,14 @@ void main() {
     final DifferenceResult diff = calculateWithLists(old, updated);
     diff.dispatchUpdates(callback);
     expect(callback.wasRemoved(position: 1, count: 2), isTrue);
+  });
+
+  test('verify that single onRemoved was dispatched with count 4', () {
+    final List<int> old = [1, 2, 3, 4];
+    final List<int> updated = [];
+    final DifferenceResult diff = calculateWithLists(old, updated);
+    diff.dispatchUpdates(callback);
+    expect(callback.wasRemoved(position: 0, count: 4), isTrue);
   });
 
   test('verify that single onMoved was dispatched, case 1', () {
@@ -80,7 +88,7 @@ DifferenceResult calculateWithLists<T extends Object>(
       .differentiate(ListsDifferenceRequest(old, updated));
 }
 
-class MockListUpdateCallback<T extends Object> implements DifferenceConsumer {
+class FakeListUpdateCallback<T extends Object> implements DifferenceConsumer {
   @override
   BatchingListUpdateCallback batching() => BatchingListUpdateCallback(this);
 

@@ -45,7 +45,8 @@ class ToDosPage extends StatelessWidget {
           child: Text(
         "Error occurred: ${snapshot.error}",
         textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 20, color: Colors.black),
+        style:
+            Theme.of(context).textTheme.headline4.copyWith(color: Colors.black),
       ));
     } else {
       return Center(
