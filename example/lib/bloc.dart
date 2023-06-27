@@ -61,7 +61,7 @@ class ToDosBloc {
   }
 }
 
-class AddToDoEvent with EquatableMixin {
+class AddToDoEvent with EquatableMixin, EquatableMixin {
   final String description;
 
   AddToDoEvent(this.description);
@@ -70,7 +70,7 @@ class AddToDoEvent with EquatableMixin {
   List get props => [description];
 }
 
-class RemoveToDoEvent with EquatableMixin {
+class RemoveToDoEvent with EquatableMixin, EquatableMixin {
   final ToDoPresentationModel toDo;
 
   RemoveToDoEvent(this.toDo);
@@ -79,7 +79,7 @@ class RemoveToDoEvent with EquatableMixin {
   List get props => [toDo];
 }
 
-class ChangeCompletionStatusEvent with EquatableMixin {
+class ChangeCompletionStatusEvent with EquatableMixin, EquatableMixin {
   final ToDoPresentationModel toDo;
   final bool shouldBeCompleted;
 
@@ -89,9 +89,9 @@ class ChangeCompletionStatusEvent with EquatableMixin {
   List get props => [toDo, shouldBeCompleted];
 }
 
-class ToDosState with EquatableMixin {
+class ToDosState with EquatableMixin, EquatableMixin {
   final BuiltList<ToDoPresentationModel> toDos;
-  final Object error;
+  final Object? error;
 
   bool get hasError => error != null;
 
@@ -100,7 +100,7 @@ class ToDosState with EquatableMixin {
   ToDosState.empty() : this(BuiltList(), null);
 
   ToDosState copy(
-      {final Iterable<ToDoPresentationModel> toDos, final Object error}) {
+      {final Iterable<ToDoPresentationModel>? toDos, final Object? error}) {
     return ToDosState(
         toDos == null ? this.toDos : BuiltList(toDos), error ?? this.error);
   }
@@ -129,7 +129,7 @@ class ToDosState with EquatableMixin {
   List get props => [toDos, error];
 }
 
-class ToDoPresentationModel with EquatableMixin {
+class ToDoPresentationModel with EquatableMixin, EquatableMixin {
   final String description;
   final bool completed;
 

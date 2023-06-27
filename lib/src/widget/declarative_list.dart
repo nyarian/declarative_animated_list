@@ -16,9 +16,8 @@ import 'package:declarative_animated_list/src/algorithm/request.dart';
 import 'package:declarative_animated_list/src/algorithm/result.dart';
 import 'package:declarative_animated_list/src/algorithm/strategy.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
-class DeclarativeList<T extends Object> extends StatefulWidget {
+class DeclarativeList<T> extends StatefulWidget {
   ///Set of items to be displayed in the list
   final List<T> items;
 
@@ -62,33 +61,32 @@ class DeclarativeList<T extends Object> extends StatefulWidget {
   ///Refer to [AnimatedList.shrinkWrap]
   final bool shrinkWrap;
 
-  const DeclarativeList({
-    required this.items,
-    required this.itemBuilder,
-    required this.removeBuilder,
-    this.equalityCheck,
-    this.scrollDirection = Axis.vertical,
-    this.insertDuration,
-    this.removeDuration,
-    this.scrollController,
-    this.padding,
-    this.physics,
-    this.primary,
-    this.reverse = false,
-    this.shrinkWrap = false,
-    Key? key,
-  })  : this.initialItemCount = items.length,
+  const DeclarativeList(
+      {final Key? key,
+      required this.items,
+      required this.itemBuilder,
+      required this.removeBuilder,
+      this.equalityCheck,
+      this.scrollDirection = Axis.vertical,
+      this.insertDuration,
+      this.removeDuration,
+      this.scrollController,
+      this.padding,
+      this.physics,
+      this.primary,
+      this.reverse = false,
+      this.shrinkWrap = false})
+      : this.initialItemCount = items.length,
         super(key: key);
 
   @override
   _DeclarativeListState<T> createState() => _DeclarativeListState<T>();
 }
 
-class _DeclarativeListState<T extends Object>
-    extends State<DeclarativeList<T>> {
+class _DeclarativeListState<T> extends State<DeclarativeList<T>> {
   final GlobalKey<AnimatedListState> _animatedListKey =
       GlobalKey<AnimatedListState>();
-  late List<T> items;
+  late final List<T> items;
 
   @override
   void initState() {
@@ -107,15 +105,19 @@ class _DeclarativeListState<T extends Object>
         .create()
         .differentiate(ListsDifferenceRequest(oldList, newList,
             equalityCheck: this.widget.equalityCheck));
-    final DifferenceConsumer consumer = _AnimatedListDifferenceConsumer<T>(
-      this._animatedListKey.currentState!,
-      oldList,
-      newList,
-      this.widget.removeBuilder,
-      removeDuration: this.widget.removeDuration,
-      insertDuration: this.widget.insertDuration,
-    );
-    result.dispatchUpdates(consumer);
+    final currentStateCopy = this._animatedListKey.currentState;
+
+    if (currentStateCopy != null) {
+      final DifferenceConsumer consumer = _AnimatedListDifferenceConsumer<T>(
+        currentStateCopy,
+        oldList,
+        newList,
+        this.widget.removeBuilder,
+        removeDuration: this.widget.removeDuration,
+        insertDuration: this.widget.insertDuration,
+      );
+      result.dispatchUpdates(consumer);
+    }
   }
 
   @override
@@ -160,7 +162,7 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
 
   @override
   void onRemoved(final int position, final int count) {
-    for (int i = position + count - 1; i >= position; i--) {
+    for (int i = position; i < position + count; i++) {
       _removeItem(i);
     }
   }
@@ -171,23 +173,13 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
     _insertItem(newPosition);
   }
 
-  void _insertItem(int position) {
-    if (insertDuration != null) {
-      state.insertItem(position, duration: insertDuration!);
-    } else {
-      state.insertItem(position);
-    }
-  }
+  void _insertItem(int position) => state.insertItem(position);
 
   void _removeItem(final int index) {
-    final AnimatedListRemovedItemBuilder builder =
+    final AnimatedRemovedItemBuilder builder =
         (final BuildContext context, final Animation<double> animation) =>
             this.removeBuilder(context, oldList[index], index, animation);
-    if (removeDuration != null) {
-      state.removeItem(index, builder, duration: removeDuration!);
-    } else {
-      state.removeItem(index, builder);
-    }
+    state.removeItem(index, builder);
   }
 }
 
