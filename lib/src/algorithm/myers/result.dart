@@ -62,7 +62,7 @@ class MyersDifferenceResult implements DifferenceResult {
   ///We always add a Snake to 0/0 so that we can run loops from end to beginning and be done
   ///when we run out of snakes.
   void _addRootSnake() {
-    Snake firstSnake = _snakes.isEmpty ? null : _snakes[0];
+    Snake? firstSnake = _snakes.isEmpty ? null : _snakes[0];
     if (firstSnake == null || firstSnake.x != 0 || firstSnake.y != 0) {
       _snakes.insert(0, Snake.empty());
     }
@@ -202,7 +202,7 @@ class MyersDifferenceResult implements DifferenceResult {
         updateCallback.batching();
     // These are add/remove ops that are converted to moves. We track their positions until
     // their respective update operations are processed.
-    final List<_PostponedUpdate> postponedUpdates = new List();
+    final List<_PostponedUpdate> postponedUpdates = <_PostponedUpdate>[];
     int posOld = _oldListSize;
     int posNew = _newListSize;
     for (int snakeIndex = _snakes.length - 1; snakeIndex >= 0; snakeIndex--) {
@@ -225,7 +225,7 @@ class MyersDifferenceResult implements DifferenceResult {
     batchingCallback.dispatchLastEvent();
   }
 
-  _PostponedUpdate _removePostponedUpdate(
+  _PostponedUpdate? _removePostponedUpdate(
       List<_PostponedUpdate> updates, int pos, bool removal) {
     for (int i = updates.length - 1; i >= 0; i--) {
       final _PostponedUpdate update = updates[i];
@@ -259,11 +259,13 @@ class MyersDifferenceResult implements DifferenceResult {
             break;
           case _flag_moved:
             final int pos = _newItemStatuses[globalIndex + i] >> _flag_offset;
-            final _PostponedUpdate update =
+            final _PostponedUpdate? update =
                 _removePostponedUpdate(postponedUpdates, pos, true);
             // the item was moved from that position
             //noinspection ConstantConditions
-            updateCallback.onMoved(update.currentPos, start);
+            if (update != null) {
+              updateCallback.onMoved(update.currentPos, start);
+            }
             break;
           case _flag_ignore: // ignoring this
             postponedUpdates
@@ -297,12 +299,14 @@ class MyersDifferenceResult implements DifferenceResult {
             break;
           case _flag_moved:
             final int pos = _oldItemStatuses[globalIndex + i] >> _flag_offset;
-            final _PostponedUpdate update =
+            final _PostponedUpdate? update =
                 _removePostponedUpdate(postponedUpdates, pos, false);
             // the item was moved to that position. we do -1 because this is a move not
             // add and removing current item offsets the target move by 1
             //noinspection ConstantConditions
-            updateCallback.onMoved(start + i, update.currentPos - 1);
+            if (update != null) {
+              updateCallback.onMoved(start + i, update.currentPos - 1);
+            }
             break;
           case _flag_ignore: // ignoring this
             postponedUpdates

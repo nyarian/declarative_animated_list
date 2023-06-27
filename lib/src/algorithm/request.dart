@@ -26,8 +26,8 @@ class ListsDifferenceRequest<T> implements DifferenceRequest {
   final EqualityCheck<T> equalityCheck;
 
   ListsDifferenceRequest(this.old, this.updated,
-      {final EqualityCheck<T> equalityCheck})
-      : this.equalityCheck = equalityCheck ?? _equalsOperatorCheck;
+      {EqualityCheck<T>? equalityCheck})
+      : this.equalityCheck = equalityCheck ?? _equalsOperatorCheck<T>();
 
   @override
   int get oldSize => old.length;
@@ -41,8 +41,8 @@ class ListsDifferenceRequest<T> implements DifferenceRequest {
   }
 }
 
-final EqualityCheck<Object> _equalsOperatorCheck =
-    (final Object left, final Object right) => left == right;
+EqualityCheck<T> _equalsOperatorCheck<T>() =>
+    (final T left, final T right) => left == right;
 
 typedef EqualityCheck<T> = bool Function(T, T);
 

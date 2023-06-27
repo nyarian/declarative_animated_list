@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
 class ToDosPage extends StatelessWidget {
   final ToDosBloc bloc;
 
-  const ToDosPage({Key key, @required this.bloc}) : super(key: key);
+  const ToDosPage({Key? key, required this.bloc}) : super(key: key);
 
   @override
   Widget build(final BuildContext context) {
@@ -46,7 +46,7 @@ class ToDosPage extends StatelessWidget {
         "Error occurred: ${snapshot.error}",
         textAlign: TextAlign.center,
         style:
-            Theme.of(context).textTheme.display1.copyWith(color: Colors.black),
+            Theme.of(context).textTheme.displaySmall?.copyWith(color: Colors.black),
       ));
     } else {
       return Center(
@@ -57,7 +57,7 @@ class ToDosPage extends StatelessWidget {
 
   Widget _buildBasedOnState(final BuildContext context,
       final AsyncSnapshot<ToDosState> snapshot, final ToDosBloc bloc) {
-    final ToDosState viewModel = snapshot.data;
+    final ToDosState viewModel = snapshot.requireData;
     final List<ToDoPresentationModel> toDos = viewModel.toDos.toList()
       ..sort((left, right) {
         if (left.completed == right.completed) {
@@ -72,7 +72,7 @@ class ToDosPage extends StatelessWidget {
         child: Icon(
           Icons.delete_outline,
           size: MediaQuery.of(context).size.height * 0.4,
-          color: Theme.of(context).accentColor,
+          color: Theme.of(context).secondaryHeaderColor,
         ),
       ));
     } else {

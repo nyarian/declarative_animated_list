@@ -35,11 +35,11 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
     final int oldSize = request.oldSize;
     final int newSize = request.newSize;
 
-    final List<Snake> snakes = new List();
+    final List<Snake> snakes = <Snake>[];
 
     // instead of a recursive implementation, we keep our own stack to avoid potential stack
     // overflow exceptions
-    final List<Range> stack = new List();
+    final List<Range> stack = <Range>[];
 
     stack.add(new Range(0, oldSize, 0, newSize));
 
@@ -47,14 +47,14 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
     // allocate forward and backward k-lines. K lines are diagonal lines in the matrix. (see the
     // paper for details)
     // These arrays lines keep the max reachable position for each k-line.
-    final List<int> forward = new List(max * 2);
-    final List<int> backward = new List(max * 2);
+    final List<int> forward = new List.filled(max * 2, 0);
+    final List<int> backward = new List.filled(max * 2, 0);
 
     // We pool the ranges to avoid allocations for each recursive call.
-    final List<Range> rangePool = new List();
+    final List<Range> rangePool = <Range>[];
     while (stack.isNotEmpty) {
       final Range range = stack.removeAt(stack.length - 1);
-      final Snake snake = _diffPartial(
+      final Snake? snake = _diffPartial(
           request,
           range.oldListStart,
           range.oldListEnd,
@@ -116,7 +116,7 @@ class MyersDifferenceAlgorithm implements DifferentiatingStrategy {
         request, snakes, forward, backward, detectMoves);
   }
 
-  Snake _diffPartial(
+  Snake? _diffPartial(
       final DifferenceRequest request,
       int startOld,
       int endOld,
