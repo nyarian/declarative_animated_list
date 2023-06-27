@@ -1,12 +1,12 @@
 name: declarative_animated_list
 description: An implementation of animated list widget that will be automatically updated based on different lists snippets.
-version: 0.1.1
+version: 0.2.0
 homepage: https://github.com/nyarian/declarative_animated_list
 repository: https://github.com/nyarian/declarative_animated_list
 issue_tracker: https://github.com/nyarian/declarative_animated_list/issues
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.12.0 <4.0.0"
 
 dependencies:
   flutter:

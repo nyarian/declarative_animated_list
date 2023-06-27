@@ -1,66 +1,57 @@
-//  Copyright 2019 nyarian
-//
-//  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
-//  You may obtain a copy of the License at
-//
-//  http://www.apache.org/licenses/LICENSE-2.0
-//
-//  Unless required by applicable law or agreed to in writing, software
-//  distributed under the License is distributed on an "AS IS" BASIS,
-//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//  See the License for the specific language governing permissions and
-//  limitations under the License.
-
 import 'package:declarative_animated_list/src/algorithm/request.dart';
 import 'package:declarative_animated_list/src/algorithm/result.dart';
 import 'package:declarative_animated_list/src/algorithm/strategy.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
+// A list widget which will calculate difference between the underlying lists
+// submitted via constructor and animate UI changes automatically.
 class DeclarativeList<T extends Object> extends StatefulWidget {
-  ///Set of items to be displayed in the list
+  /// Set of items to be displayed in the list
   final List<T> items;
 
-  ///Builder function for inserted items
+  /// Builder function for inserted items
   final AnimatedItemBuilder<T> itemBuilder;
 
-  ///Builder function for removed items
+  /// Builder function for removed items
   final AnimatedItemBuilder<T> removeBuilder;
 
-  ///Callback that is used to determine if two given objects are equal. [==]
-  ///operator will be used by default.
+  /// Callback that is used to determine if two given objects are equal. [==]
+  /// operator will be used by default.
   final EqualityCheck<T>? equalityCheck;
 
-  ///Initial items count for the list, gets defined automatically
+  /// Initial items count for the list, gets defined automatically
   final int initialItemCount;
 
-  ///Refer to [AnimatedListState.insertItem]
+  /// Refer to [AnimatedListState.insertItem]
   final Duration? insertDuration;
 
-  ///Refer to [AnimatedListState.removeItem]
+  /// Refer to [AnimatedListState.removeItem]
   final Duration? removeDuration;
 
-  ///Refer to [AnimatedList.scrollDirection]
+  /// Refer to [AnimatedList.scrollDirection]
   final Axis scrollDirection;
 
-  ///Refer to [AnimatedList.scrollController]
+  /// Refer to [AnimatedList.controller]
   final ScrollController? scrollController;
 
-  ///Refer to [AnimatedList.padding]
+  /// Refer to [AnimatedList.padding]
   final EdgeInsetsGeometry? padding;
 
-  ///Refer to [AnimatedList.physics]
+  /// Refer to [AnimatedList.physics]
   final ScrollPhysics? physics;
 
-  ///Refer to [AnimatedList.primary]
+  /// Refer to [AnimatedList.primary]
   final bool? primary;
 
-  ///Refer to [AnimatedList.reverse]
+  /// Refer to [AnimatedList.reverse]
   final bool reverse;
 
-  ///Refer to [AnimatedList.shrinkWrap]
+  /// Refer to [AnimatedList.shrinkWrap]
   final bool shrinkWrap;
+
+  /// Refer to [AnimatedList.clipBehavior]
+  final Clip clipBehavior;
 
   const DeclarativeList({
     required this.items,
@@ -76,58 +67,74 @@ class DeclarativeList<T extends Object> extends StatefulWidget {
     this.primary,
     this.reverse = false,
     this.shrinkWrap = false,
+    this.clipBehavior = Clip.hardEdge,
     Key? key,
-  })  : this.initialItemCount = items.length,
+  })  : initialItemCount = items.length,
         super(key: key);
 
   @override
   _DeclarativeListState<T> createState() => _DeclarativeListState<T>();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties
+      ..add(IterableProperty('items', items))
+      ..add(IntProperty('initialItemCount', initialItemCount))
+      ..add(DiagnosticsProperty('insertDuration', insertDuration))
+      ..add(DiagnosticsProperty('removeDuration', removeDuration))
+      ..add(EnumProperty('scrollDirection', scrollDirection))
+      ..add(DiagnosticsProperty('scrollController', scrollController))
+      ..add(DiagnosticsProperty('padding', padding))
+      ..add(DiagnosticsProperty('physics', physics))
+      ..add(DiagnosticsProperty('primary', primary))
+      ..add(DiagnosticsProperty('reverse', reverse))
+      ..add(DiagnosticsProperty('shrinkWrap', shrinkWrap))
+      ..add(EnumProperty('clipBehavior', clipBehavior))
+      ..add(ObjectFlagProperty.has('itemBuilder', itemBuilder))
+      ..add(ObjectFlagProperty.has('removeBuilder', removeBuilder))
+      ..add(ObjectFlagProperty.has('equalityCheck', equalityCheck));
+  }
 }
 
 class _DeclarativeListState<T extends Object>
     extends State<DeclarativeList<T>> {
-  final GlobalKey<AnimatedListState> _animatedListKey =
-      GlobalKey<AnimatedListState>();
-  late List<T> items;
+  final _animatedListKey = GlobalKey<AnimatedListState>();
 
   @override
-  void initState() {
-    super.initState();
-    this.items = List<T>.from(this.widget.items);
-  }
-
-  @override
-  void didUpdateWidget(final DeclarativeList<T> oldWidget) {
+  void didUpdateWidget(DeclarativeList<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _updateList(oldWidget.items, this.widget.items);
+    _updateList(oldWidget.items, widget.items);
   }
 
   void _updateList(final List<T> oldList, final List<T> newList) {
-    final DifferenceResult result = DifferentiatingStrategyFactory()
-        .create()
-        .differentiate(ListsDifferenceRequest(oldList, newList,
-            equalityCheck: this.widget.equalityCheck));
-    final DifferenceConsumer consumer = _AnimatedListDifferenceConsumer<T>(
+    final request = ListsDifferenceRequest(
+      oldList,
+      newList,
+      equalityCheck: widget.equalityCheck,
+    );
+    final result =
+        DifferentiatingStrategyFactory().create().differentiate(request);
+    final consumer = _AnimatedListDifferenceConsumer<T>(
       this._animatedListKey.currentState!,
       oldList,
       newList,
-      this.widget.removeBuilder,
-      removeDuration: this.widget.removeDuration,
-      insertDuration: this.widget.insertDuration,
+      widget.removeBuilder,
+      removeDuration: widget.removeDuration,
+      insertDuration: widget.insertDuration,
     );
     result.dispatchUpdates(consumer);
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return AnimatedList(
       key: _animatedListKey,
       initialItemCount: widget.initialItemCount,
-      itemBuilder: (final BuildContext context, final int index,
-              final Animation<double> animation) =>
-          this
-              .widget
-              .itemBuilder(context, this.widget.items[index], index, animation),
+      itemBuilder: (context, index, animation) {
+        final item = widget.items[index];
+        return widget.itemBuilder(context, item, index, animation);
+      },
       scrollDirection: widget.scrollDirection,
       controller: widget.scrollController,
       padding: widget.padding,
@@ -135,6 +142,7 @@ class _DeclarativeListState<T extends Object>
       primary: widget.primary,
       reverse: widget.reverse,
       shrinkWrap: widget.shrinkWrap,
+      clipBehavior: widget.clipBehavior,
     );
   }
 }
@@ -148,8 +156,13 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
   final Duration? insertDuration;
 
   _AnimatedListDifferenceConsumer(
-      this.state, this.oldList, this.updatedList, this.removeBuilder,
-      {this.insertDuration, this.removeDuration});
+    this.state,
+    this.oldList,
+    this.updatedList,
+    this.removeBuilder, {
+    this.insertDuration,
+    this.removeDuration,
+  });
 
   @override
   void onInserted(final int position, final int count) {
@@ -172,6 +185,8 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
   }
 
   void _insertItem(int position) {
+    // We don't want to mess with the Flutter's internal constant in case it 
+    // changes
     if (insertDuration != null) {
       state.insertItem(position, duration: insertDuration!);
     } else {
@@ -180,9 +195,12 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
   }
 
   void _removeItem(final int index) {
-    final AnimatedListRemovedItemBuilder builder =
-        (final BuildContext context, final Animation<double> animation) =>
-            this.removeBuilder(context, oldList[index], index, animation);
+    Widget builder(BuildContext context, Animation<double> animation) {
+      return removeBuilder(context, oldList[index], index, animation);
+    }
+
+    // We don't want to mess with the Flutter's internal constant in case it 
+    // changes
     if (removeDuration != null) {
       state.removeItem(index, builder, duration: removeDuration!);
     } else {
@@ -192,4 +210,8 @@ class _AnimatedListDifferenceConsumer<T> extends DifferenceConsumer {
 }
 
 typedef AnimatedItemBuilder<T> = Widget Function(
-    BuildContext context, T item, int index, Animation<double> animation);
+  BuildContext context,
+  T item,
+  int index,
+  Animation<double> animation,
+);

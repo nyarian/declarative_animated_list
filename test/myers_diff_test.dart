@@ -9,88 +9,82 @@ void main() {
   setUp(() => callback = FakeListUpdateCallback());
 
   test('verify that single onInserted was dispatched with count 1', () {
-    final List<int> old = [1, 3];
-    final List<int> updated = [1, 2, 3];
-    final DifferenceResult diff = calculateWithLists(old, updated);
-    diff.dispatchUpdates(callback);
+    final old = [1, 3];
+    final updated = [1, 2, 3];
+    calculateWithLists(old, updated).dispatchUpdates(callback);
     expect(callback.wasInserted(position: 1, count: 1), isTrue);
   });
 
   test('verify that single onInserted was dispatched with count 2', () {
-    final List<int> old = [1, 4];
-    final List<int> updated = [1, 2, 3, 4];
-    final DifferenceResult diff = calculateWithLists(old, updated);
-    diff.dispatchUpdates(callback);
+    final old = [1, 4];
+    final updated = [1, 2, 3, 4];
+    calculateWithLists(old, updated).dispatchUpdates(callback);
     expect(callback.wasInserted(position: 1, count: 2), isTrue);
   });
 
   test('verify that single onRemoved was dispatched with count 1', () {
-    final List<int> old = [1, 2, 3];
-    final List<int> updated = [1, 3];
-    final DifferenceResult diff = calculateWithLists(old, updated);
-    diff.dispatchUpdates(callback);
+    final old = [1, 2, 3];
+    final updated = [1, 3];
+    calculateWithLists(old, updated).dispatchUpdates(callback);
     expect(callback.wasRemoved(position: 1, count: 1), isTrue);
   });
 
   test('verify that single onRemoved was dispatched with count 2', () {
-    final List<int> old = [1, 2, 3, 4];
-    final List<int> updated = [1, 4];
-    final DifferenceResult diff = calculateWithLists(old, updated);
-    diff.dispatchUpdates(callback);
+    final old = [1, 2, 3, 4];
+    final updated = [1, 4];
+    calculateWithLists(old, updated).dispatchUpdates(callback);
     expect(callback.wasRemoved(position: 1, count: 2), isTrue);
   });
 
   test('verify that single onRemoved was dispatched with count 4', () {
-    final List<int> old = [1, 2, 3, 4];
-    final List<int> updated = [];
-    final DifferenceResult diff = calculateWithLists(old, updated);
-    diff.dispatchUpdates(callback);
+    final old = [1, 2, 3, 4];
+    final updated = <int>[];
+    calculateWithLists(old, updated).dispatchUpdates(callback);
     expect(callback.wasRemoved(position: 0, count: 4), isTrue);
   });
 
   test('verify that single onMoved was dispatched, case 1', () {
-    final List<int> old = [1, 2, 3];
-    final List<int> updated = [1, 3, 2];
-    final DifferenceResult diff = calculateWithLists(old, updated);
-    diff.dispatchUpdates(callback);
+    final old = [1, 2, 3];
+    final updated = [1, 3, 2];
+    calculateWithLists(old, updated).dispatchUpdates(callback);
     expect(callback.wasMoved(from: 2, to: 1), isTrue);
   });
 
   test('verify that single onMoved was dispatched case 2', () {
-    final List<int> old = [1, 2, 3];
-    final List<int> updated = [3, 1, 2];
-    final DifferenceResult diff = calculateWithLists(old, updated);
-    diff.dispatchUpdates(callback);
+    final old = [1, 2, 3];
+    final updated = [3, 1, 2];
+    calculateWithLists(old, updated).dispatchUpdates(callback);
     expect(callback.wasMoved(from: 2, to: 0), isTrue);
   });
 
   test('verify that single onMoved was dispatched case 3', () {
-    final List<int> old = [1, 2, 3];
-    final List<int> updated = [2, 1, 3];
-    final DifferenceResult diff = calculateWithLists(old, updated);
-    diff.dispatchUpdates(callback);
+    final old = [1, 2, 3];
+    final updated = [2, 1, 3];
+    calculateWithLists(old, updated).dispatchUpdates(callback);
     expect(callback.wasMoved(from: 1, to: 0), isTrue);
   });
 
   test('verify that double onMoved was dispatched case 1', () {
-    final List<int> old = [1, 2, 3, 4];
-    final List<int> updated = [2, 1, 4, 3];
-    final DifferenceResult diff = calculateWithLists(old, updated);
-    diff.dispatchUpdates(callback);
+    final old = [1, 2, 3, 4];
+    final updated = [2, 1, 4, 3];
+    calculateWithLists(old, updated).dispatchUpdates(callback);
     expect(callback.wasMoved(from: 3, to: 1), isTrue);
     expect(callback.wasMoved(from: 2, to: 0), isTrue);
   });
 }
 
 DifferenceResult calculateWithLists<T extends Object>(
-    final List<T> old, final List<T> updated) {
+  List<T> old,
+  List<T> updated,
+) {
   return MyersDifferenceAlgorithm()
       .differentiate(ListsDifferenceRequest(old, updated));
 }
 
 class FakeListUpdateCallback<T extends Object> implements DifferenceConsumer {
   @override
-  BatchingListUpdateCallback batching() => BatchingListUpdateCallback(this);
+  // ignore: use_to_and_as_if_applicable
+  BatchingListUpdateCallback batch() => BatchingListUpdateCallback(this);
 
   @override
   void onInserted(int position, int count) => _inserts[position] = count;

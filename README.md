@@ -7,13 +7,12 @@ Based on [Android's DiffUtil](https://github.com/aosp-mirror/platform_frameworks
 
 ```dart
 
-//Create a list tile, wrapped with an animation applying widget
-Widget _buildAnimatedTile(final Animation<double> animation, final PresentationModel model) {
+// Create a list tile, wrapped with an animation applying widget
+Widget _buildAnimatedTile(Animation<double> animation, PresentationModel model) {
   return FadeTransition(
     opacity: animation,
     child: SizeTransition(
       sizeFactor: animation,
-      axisAlignment: 0.0,
       child: SomeWidget(model),
     ),
   );
@@ -23,34 +22,9 @@ Widget _buildRemovingTile(final Animation<double> animation, final PresentationM
   //... 
 }
 
-final DeclarativeList<PresentationModel> declarativeList = DeclarativeList(
+final declarativeList = DeclarativeList<PresentationModel>(
   items: presentationModels,
-  itemBuilder: (BuildContext ctx, PresentationModel model, int index, Animation<double> animation) {
-    return _buildAnimatedTile(animation, model);
-  },
-  removeBuilder: (BuildContext ctx, PresentationModel model, int index, Animation<double> animation) {
-    return _buildRemovingTile(animation, model);
-  }  
+  itemBuilder: (ctx, model, index, animation) => _buildAnimatedTile(animation, model),
+  removeBuilder: (ctx, model, index, animation) => _buildRemovingTile(animation, model),
 );
-
-
 ```
-
-And... that's it!
-
-## Getting Started
-
-#### 1. Add dependency to your `pubspec.yaml`
-
-```yaml
-dependencies:
-  declarative_animated_list: ^0.1.0-nullsafety.0
-```
-
-#### 2. Import it
-
-```dart
-import 'package:declarative_animated_list/declarative_animated_list.dart';
-```
-
-#### 3. Use it! Refer to the `examples` folder if needed.

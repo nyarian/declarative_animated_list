@@ -6,11 +6,10 @@ import 'package:equatable/equatable.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ToDosBloc {
-  final StreamController<AddToDoEvent> _addToDoSC = StreamController();
-  final BehaviorSubject<ToDosState> _toDosBS = BehaviorSubject();
-  final StreamController<RemoveToDoEvent> _removeToDoSC = StreamController();
-  final StreamController<ChangeCompletionStatusEvent> _changeToDoStatusSC =
-      StreamController();
+  final _addToDoSC = StreamController<AddToDoEvent>();
+  final _toDosBS = BehaviorSubject<ToDosState>();
+  final _removeToDoSC = StreamController<RemoveToDoEvent>();
+  final _changeToDoStatusSC = StreamController<ChangeCompletionStatusEvent>();
 
   ToDosState get _currentState => _toDosBS.value;
 
@@ -32,14 +31,14 @@ class ToDosBloc {
       _changeToDoStatusSC.sink;
 
   void _fetchToDosFromRepository() {
-    final ToDosState newState = _currentState
+    final newState = _currentState
         .populate(List.generate(10, (_) => ToDoPresentationModel.random()));
     _toDosBS.add(newState);
   }
 
   void _addToDo(final AddToDoEvent event) {
-    final ToDoPresentationModel newToDo =
-        ToDoPresentationModel(event.description, false);
+    final newToDo =
+        ToDoPresentationModel(event.description, isCompleted: false);
     _toDosBS.add(_currentState.addToDo(newToDo));
   }
 
@@ -48,7 +47,7 @@ class ToDosBloc {
   }
 
   void _changeStatus(final ChangeCompletionStatusEvent event) {
-    final ToDoPresentationModel targetToDo =
+    final targetToDo =
         event.shouldBeCompleted ? event.toDo.complete() : event.toDo.resume();
     _toDosBS.add(_currentState.replace(event.toDo, targetToDo));
   }
@@ -64,34 +63,34 @@ class ToDosBloc {
 class AddToDoEvent with EquatableMixin {
   final String description;
 
-  AddToDoEvent(this.description);
+  const AddToDoEvent(this.description);
 
   @override
-  List get props => [description];
+  List<Object?> get props => [description];
 }
 
 class RemoveToDoEvent with EquatableMixin {
   final ToDoPresentationModel toDo;
 
-  RemoveToDoEvent(this.toDo);
+  const RemoveToDoEvent(this.toDo);
 
   @override
-  List get props => [toDo];
+  List<Object?> get props => [toDo];
 }
 
 class ChangeCompletionStatusEvent with EquatableMixin {
   final ToDoPresentationModel toDo;
   final bool shouldBeCompleted;
 
-  ChangeCompletionStatusEvent(this.toDo, this.shouldBeCompleted);
+  ChangeCompletionStatusEvent(this.toDo, {required this.shouldBeCompleted});
 
   @override
-  List get props => [toDo, shouldBeCompleted];
+  List<Object?> get props => [toDo, shouldBeCompleted];
 }
 
 class ToDosState with EquatableMixin {
   final BuiltList<ToDoPresentationModel> toDos;
-  final Object error;
+  final Object? error;
 
   bool get hasError => error != null;
 
@@ -99,17 +98,21 @@ class ToDosState with EquatableMixin {
 
   ToDosState.empty() : this(BuiltList(), null);
 
-  ToDosState copy(
-      {final Iterable<ToDoPresentationModel> toDos, final Object error}) {
+  ToDosState copy({
+    Iterable<ToDoPresentationModel>? toDos,
+    Object? error,
+  }) {
     return ToDosState(
-        toDos == null ? this.toDos : BuiltList(toDos), error ?? this.error);
+      toDos == null ? this.toDos : BuiltList(toDos),
+      error ?? this.error,
+    );
   }
 
   ToDosState addToDo(final ToDoPresentationModel toDo) =>
-      copy(toDos: this.toDos.toList()..add(toDo));
+      copy(toDos: toDos.toList()..add(toDo));
 
   ToDosState removeToDo(final ToDoPresentationModel toDo) =>
-      copy(toDos: this.toDos.toList()..remove(toDo));
+      copy(toDos: toDos.toList()..remove(toDo));
 
   ToDosState populate(final List<ToDoPresentationModel> toDos) =>
       copy(toDos: this.toDos.toList()..addAll(toDos));
@@ -118,34 +121,36 @@ class ToDosState with EquatableMixin {
 
   ToDosState replace(final ToDoPresentationModel originalToDo,
       final ToDoPresentationModel targetToDo) {
-    final int index = this.toDos.indexOf(originalToDo);
+    final index = toDos.indexOf(originalToDo);
     return copy(
-        toDos: this.toDos.toList()
-          ..removeAt(index)
-          ..insert(index, targetToDo));
+      toDos: toDos.toList()
+        ..removeAt(index)
+        ..insert(index, targetToDo),
+    );
   }
 
   @override
-  List get props => [toDos, error];
+  List<Object?> get props => [toDos, error];
 }
 
 class ToDoPresentationModel with EquatableMixin {
   final String description;
-  final bool completed;
+  final bool isCompleted;
 
-  ToDoPresentationModel(this.description, this.completed);
+  ToDoPresentationModel(this.description, {required this.isCompleted});
 
   ToDoPresentationModel.random()
-      : this(_random.nextInt(10000).toString(), _random.nextBool());
+      : this(_random.nextInt(10000).toString(),
+            isCompleted: _random.nextBool());
 
   ToDoPresentationModel complete() =>
-      ToDoPresentationModel(this.description, true);
+      ToDoPresentationModel(description, isCompleted: true);
 
   ToDoPresentationModel resume() =>
-      ToDoPresentationModel(this.description, false);
+      ToDoPresentationModel(description, isCompleted: false);
 
   @override
-  List get props => [description, completed];
+  List<Object?> get props => [description, isCompleted];
 }
 
-Random _random = Random();
+final _random = Random();
